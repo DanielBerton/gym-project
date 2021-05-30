@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+ {% block pagebody %}
+<h1> Progetto di Base di Dati </h1>
+
+Insert your username:
+<form action="/login" method="POST">
+    Email <input name="user" type="text">
+    Password <input name="pwd" type="password">
+    <input type="submit">
+</form>
+{% endblock %}
