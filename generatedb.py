@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
+from models import Users
 
 app = Flask (__name__)
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -21,7 +22,6 @@ class Users(db.Model):
 
     def __repr__(self):
         return "<User(id='%s', email='%s', password='%s')>" % (self.id, self.email, self.password)
-
 
 alice = Users(id=1, email='alice@gmail.com', password='alice')
 daniele = Users(id=2, email='daniele@gmail.com', password='daniele')

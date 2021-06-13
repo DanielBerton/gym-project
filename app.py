@@ -1,3 +1,4 @@
+from models import Users
 from flask import Flask
 from flask import render_template
 from flask import request, redirect, url_for, make_response
@@ -13,32 +14,12 @@ app.register_blueprint(login_bp)
 
 metadata = MetaData()
 
-# Session = sessionmaker(bind=engine)       # creazione della factory
-# session = Session()
-
 app.config['SECRET_KEY'] = 'ubersecret'
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 db = SQLAlchemy(app)
-
-class Users(db.Model, UserMixin):
-    id = db.Column('id', db.Integer, primary_key = True)
-    email = db.Column(db.String(100))
-    password = db.Column(db.String(50))  
-
-    def __init__(self, id, email, password):
-        self.id = id
-        self.email = email
-        self.password = password
-
-    def __repr__(self):
-        return "<User(id='%s', email='%s', password='%s')>" % (self.id, self.email, self.password)
-    
-    # def get_id(self):
-    #     return self.id
 
 def get_user_by_email(email):
     log('[get_user_by_email] executed', '')
