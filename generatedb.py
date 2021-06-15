@@ -19,12 +19,6 @@ class Users(db.Model):
     password = db.Column(db.String(50))
     role = db.Column(db.String(50))
 
-    # def __init__(self, id, email, password, role):
-    #     self.id = id
-    #     self.email = email
-    #     self.password = password
-    #     self.role = role
-
     def __repr__(self):
         return "<User(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
 
@@ -37,15 +31,23 @@ class Owner(Users, db.Model):
     surname = db.Column(db.String(100))
     company_name = db.Column(db.String(100), nullable=False)
 
-    # def __init__(self, id, role, name, surname, company_name):
-    #     self.id = id
-    #     self.role = role
-    #     self.name = name
-    #     self.surname = surname
-    #     self.company_name = company_name
-
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
+class Member(Users, db.Model):
+    __tablename__ = 'member'
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+    def __repr__(self):
+        return "<Member(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
+class Instructor(Users, db.Model):
+    __tablename__ = 'instructor'
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+    def __repr__(self):
+        return "<Instructor(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
 
 class Gym(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
@@ -91,10 +93,8 @@ class Course(db.Model):
     
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States')
 
-print(gold_gym.id)
 room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', gym=gold_gym.id)
 
-print(room_1.gym)
 
 inst = inspect(Owner)
 attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
@@ -104,9 +104,10 @@ print(attr_names)
 print('-----------------------------------------')
 
 db.session.add_all([
-    Users(id=1, email='alice@gmail.com', password='alice', role='user'),
-    Users(id=2, email='daniele@gmail.com', password='daniele', role='user'),
-    Owner(id=3, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name=''),
+    Member(id=1, email='alice@gmail.com', password='alice', role='user'),
+    Member(id=2, email='daniele@gmail.com', password='daniele', role='user'),
+    Instructor(id=3, email='daniele@gmail.com', password='daniele', role='user'),
+    Owner(id=4, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name=''),
     gold_gym,
     room_1
 ])

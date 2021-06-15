@@ -44,14 +44,23 @@ class Owner(Users, db.Model):
     surname = db.Column(db.String(100))
     company_name = db.Column(db.String(100), nullable=False)
 
-    # def __init__(self, id, name, surname, company_name):
-    #     self.id = id
-    #     self.name = name
-    #     self.surname = surname
-    #     self.company_name = company_name
-
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
+class Member(Users, db.Model):
+    __tablename__ = 'member'
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+    def __repr__(self):
+        return "<Member(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
+class Instructor(Users, db.Model):
+    __tablename__ = 'instructor'
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+    def __repr__(self):
+        return "<Instructor(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+
 
 class Gym(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
@@ -68,7 +77,6 @@ class Gym(db.Model):
         self.city = city
         self.zipCode = zipCode
         self.country = country
-
 
 class WeightRoom(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
