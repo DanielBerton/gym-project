@@ -23,11 +23,13 @@ db = SQLAlchemy(app)
 
 class Users(db.Model, UserMixin):
     __tablename__ = 'users'
+    __table_args__ = (
+        db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
     role = db.Column(db.String(50))
-
     # def __init__(self, id, email, password, role):
     #     self.id = id
     #     self.email = email

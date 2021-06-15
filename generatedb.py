@@ -14,6 +14,9 @@ db = SQLAlchemy(app)
 
 class Users(db.Model):
     __tablename__ = 'users'
+    __table_args__ = (
+        db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
@@ -106,7 +109,7 @@ print('-----------------------------------------')
 db.session.add_all([
     Member(id=1, email='alice@gmail.com', password='alice', role='user'),
     Member(id=2, email='daniele@gmail.com', password='daniele', role='user'),
-    Instructor(id=3, email='daniele@gmail.com', password='daniele', role='user'),
+    Instructor(id=3, email='daniele2@gmail.com', password='daniele', role='user'),
     Owner(id=4, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name=''),
     gold_gym,
     room_1

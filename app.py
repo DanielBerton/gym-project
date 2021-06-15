@@ -64,8 +64,11 @@ def private ():
     log('[private] executed')
     users = Users.query.all()
     log('[private] users ', users)
-    resp = make_response(render_template("private.html", users=users, user=user.email))
 
+    if (user.role == 'admin'):
+        resp = make_response(render_template("admin_dashboard.html", users=users, user=user))
+    else:
+        resp = make_response(render_template("private.html", users=users, user=user))
     #gyms = session.query(Gym, WeightRoom).filter(Gym.id==WeightRoom.gym).all()
 
     golden = session.query(Gym).join(WeightRoom).filter(Gym.id == WeightRoom.gym).first()
