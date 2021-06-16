@@ -30,21 +30,33 @@ class Users(db.Model, UserMixin):
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
     role = db.Column(db.String(50))
-    # def __init__(self, id, email, password, role):
-    #     self.id = id
-    #     self.email = email
-    #     self.password = password
-    #     self.role = role
+    #__mapper_args__ = {'polymorphic_on': email }
+
+    def __init__(self, id, email, password, role):
+        self.id = id
+        self.email = email
+        self.password = password
+        self.role = role
 
     def __repr__(self):
         return "<User(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
 
-class Owner(Users, db.Model):
+
+class Owner(Users):
     __tablename__ = 'owner'
+    __mapper_args__ = {'polymorphic_identity': 'users'}
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     name = db.Column(db.String(100))
     surname = db.Column(db.String(100))
     company_name = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, id, email, password, role, name, surname, company_name):
+        super().__init__(id, email, password, role)
+        print('inside super: '+ name)
+        self.name = name
+        self.surname = surname
+        self.company_name = company_name
+
 
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
@@ -59,9 +71,10 @@ class Member(Users, db.Model):
 class Instructor(Users, db.Model):
     __tablename__ = 'instructor'
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    specialization = db.Column(db.String(100))
 
     def __repr__(self):
-        return "<Instructor(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
+        return "<Instructor(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
 
 
 class Gym(db.Model):
@@ -71,14 +84,16 @@ class Gym(db.Model):
     city = db.Column(db.String(100))
     zipCode = db.Column(db.String(100))
     country = db.Column(db.String(100))
-    
-    def __init__(self, id, name, address, city, zipCode, country):
+    owner = Column(Integer, ForeignKey('owner.id'))
+
+    def __init__(self, id, name, address, city, zipCode, country, owner):
         self.id = id
         self.name = name
         self.address = address
         self.city = city
         self.zipCode = zipCode
         self.country = country
+        self.owner = owner
 
 class WeightRoom(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
@@ -96,11 +111,13 @@ class WeightRoom(db.Model):
         self.gym = gym
 
 class Course(db.Model):
-    id = db.Column('id', db.Integer, primary_key = True)
-    name = db.Column(db.String(100))
-    places = db.Integer
+        id = db.Column('id', db.Integer, primary_key = True)
+        name = db.Column(db.String(100))
+        places = db.Integer
+        gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, id, name, places):
-        self.id = id
-        self.name = name
-        self.places = places
+        def __init__(self, id, name, places, gym):
+            self.id = id
+            self.name = name
+            self.places = places
+            self.gym = gym

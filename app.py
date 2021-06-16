@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join
 from sqlalchemy.sql import select
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -18,6 +19,7 @@ engine = create_engine('sqlite:///database.db', echo=True)
 app.register_blueprint(login_bp)
 
 metadata = MetaData()
+bootstrap = Bootstrap(app)
 
 app.config['SECRET_KEY'] = 'ubersecret'
 
@@ -76,6 +78,15 @@ def private ():
     # gyms = Gym.query.all()
     log(golden)
     return resp
+
+@app.route('/weight_rooms', methods=['GET', 'POST'])
+def weight_rooms():
+    return make_response(render_template("weight_rooms.html"))
+
+@app.route('/courses', methods=['GET', 'POST'])
+def courses():
+    return make_response(render_template("courses.html"))
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
