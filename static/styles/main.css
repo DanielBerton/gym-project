@@ -1,3 +1,9 @@
 .header {
     border-bottom: 2px solid rgb(177, 175, 175) !important;
-} 
+}
+
+.slot {
+    border: 1px solid rgb(48, 47, 47) !important;
+    background-color: rgb(177, 175, 175);
+    max-width: 120px;
+}

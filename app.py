@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join
 from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
+from datetime import date, timedelta
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -81,7 +82,26 @@ def private ():
 
 @app.route('/weight_rooms', methods=['GET', 'POST'])
 def weight_rooms():
-    return make_response(render_template("weight_rooms.html"))
+    #slots = Slot.query.group_by(Slot.day).all()
+    slots = Slot.query.all()
+    days = []
+    start_date = date(2021, 7, 1)
+    end_date = date(2021, 7, 7)
+    delta = timedelta(days=1)
+    while start_date <= end_date:
+        days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        # print(start_date.day)
+        # print(start_date.strftime('%A'))
+        #print(start_date.strftime("%Y-%m-%d")+ start_date.strftime('%A') )
+        start_date += delta
+    #Calendar(day=17, month=6, month_name='giovedì')
+
+    print(days)
+    
+
+
+    print(slots)
+    return make_response(render_template("weight_rooms.html", slots=slots,days=days ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 def courses():

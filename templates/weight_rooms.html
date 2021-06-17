@@ -1,6 +1,55 @@
 {% extends "base.html" %}
  {% block pagebody %}
-    Sala pesi
+    
+    <h5 class="m-2">Sala pesi</h5>
+    <!-- <h5 class="m-2">Sala pesi <h5> -->
+    <!-- Start calendar --> 
+    <div class="container">
+        <div class="row">
+            {% for day in days %}
+                <div class="col-sm">
+            
+                    {{ day.day_name }}
+                    {{ day.day }} {{ day.month }}
+
+                    {% for slot in slots %}
+                        <!-- check if slot is the same day of calendar -->
+                        {% if slot.day == day.day %}
+                        <div class="slot m-2"> 
+                            <p><b>Slot temporale</b></p>
+                            <p>{{ slot.day }} </p>
+                            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                        </div> 
+                    {% endif %} 
+
+            {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+      </div>
+
+            
+
+
+    <!-- {% for slot in slots %}
+    <div class="slot m-2"> 
+        <p><b>Slot temporale</b></p>
+        <p>{{ slot.day }} </p>
+        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+    </div> 
+
+     <input type="time"> 
+
+
+
+    {% endfor %} -->
+    
+    
+    
+    <!-- End calendar -->
+    
+    
+    
     </body>
 
     <form action="/logout" method="POST">

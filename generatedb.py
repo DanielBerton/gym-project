@@ -4,7 +4,8 @@ from flask import Flask
 from models import Gym, Users
 from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import as_declarative, has_inherited_table, declared_attr
-
+import datetime
+from datetime import date
 
 app = Flask (__name__)
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -49,7 +50,6 @@ class Owner(Users):
         self.name = name
         self.surname = surname
         self.company_name = company_name
-
 
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
@@ -114,6 +114,43 @@ class Course(db.Model):
         self.name = name
         self.places = places
         self.gym = gym
+
+class Booking(db.Model):
+    __tablename__ = 'booking'
+    id = db.Column('id', db.Integer, primary_key = True)
+
+class Slot(db.Model):
+    __tablename__ = 'slot'
+    id = db.Column('id', db.Integer, primary_key = True)
+    day = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    hourFrom = db.Column(db.String(100))
+    hourTo = db.Column(db.String(100))
+
+
+datetime_object = datetime.datetime.now()
+
+db.session.add_all([
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='9:00', hourTo='10:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='10:00', hourTo='11:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='12:00', hourTo='13:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='14:00', hourTo='15:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='16:00', hourTo='17:00'),
+Slot(day=1, date=date(2021, 7, 1), hourFrom='17:00', hourTo='18:00'),
+Slot(day=1, date=date(2021, 7, 1), hourFrom='18:00', hourTo='19:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='19:00', hourTo='20:00'),
+Slot(day=1 ,date=date(2021, 7, 1), hourFrom='20:00', hourTo='21:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='9:00', hourTo='10:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='10:00', hourTo='11:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='12:00', hourTo='13:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='14:00', hourTo='15:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='16:00', hourTo='17:00'),
+Slot(day=2, date=date(2021, 7, 2), hourFrom='17:00', hourTo='18:00'),
+Slot(day=2, date=date(2021, 7, 2), hourFrom='18:00', hourTo='19:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='19:00', hourTo='20:00'),
+Slot(day=2 ,date=date(2021, 7, 2), hourFrom='20:00', hourTo='21:00')
+
+])
 
 admin = Owner(id=4, email='admin@gmail.com', 
               password='admin', role='owner', 

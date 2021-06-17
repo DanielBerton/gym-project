@@ -121,3 +121,22 @@ class Course(db.Model):
             self.name = name
             self.places = places
             self.gym = gym
+
+class Booking(db.Model):
+    __tablename__ = 'booking'
+    id = db.Column('id', db.Integer, primary_key = True)
+
+class Slot(db.Model):
+    __tablename__ = 'slot'
+    id = db.Column('id', db.Integer, primary_key = True)
+    day = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    hourFrom = db.Column(db.String(100))
+    hourTo = db.Column(db.String(100))
+
+
+class Calendar:
+    def __init__(self, day, month, day_name):
+        self.day = day
+        self.month = month
+        self.day_name = day_name
