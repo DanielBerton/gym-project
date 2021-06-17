@@ -94,12 +94,9 @@ def weight_rooms():
         # print(start_date.strftime('%A'))
         #print(start_date.strftime("%Y-%m-%d")+ start_date.strftime('%A') )
         start_date += delta
-    #Calendar(day=17, month=6, month_name='giovedì')
 
     print(days)
-    
-
-
+  
     print(slots)
     return make_response(render_template("weight_rooms.html", slots=slots,days=days ))
 
@@ -107,6 +104,27 @@ def weight_rooms():
 def courses():
     return make_response(render_template("courses.html"))
 
+@app.route('/select_slot', methods=['GET', 'POST'])
+def select_slot():
+    selected_slot =request.args.get("slot_id")
+
+    # get slot from id
+    slot = Slot.query.filter_by(id=selected_slot).first()
+    log(slot)
+    user = current_user
+    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user))
+    return resp
+
+@app.route('/book_slot', methods=['GET', 'POST'])
+def book_slot():
+    slot_id =request.args.get("slot_id")
+    log('book_slot id: ', slot_id)
+    log('book_slot user id: ', current_user.id)
+    # book slot for this user
+    # start transaction
+
+    # end transaction
+    return weight_rooms()
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

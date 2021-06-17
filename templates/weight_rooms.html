@@ -1,5 +1,10 @@
 {% extends "base.html" %}
  {% block pagebody %}
+
+ <!-- <form method ="post" action="/">
+    <button type="submit" name="submit_a" value="submit_a"> Submit_a </button>
+    <button type="submit" name="submit_b" value="submit_b"> Submit_b </button>
+  </form>  -->
     
     <h5 class="m-2">Sala pesi</h5>
     <!-- <h5 class="m-2">Sala pesi <h5> -->
@@ -15,11 +20,16 @@
                     {% for slot in slots %}
                         <!-- check if slot is the same day of calendar -->
                         {% if slot.day == day.day %}
-                        <div class="slot m-2"> 
-                            <p><b>Slot temporale</b></p>
-                            <p>{{ slot.day }} </p>
-                            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
-                        </div> 
+                        
+                        
+                        <form action="/select_slot" method="GET" >
+                            <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">
+                                <p><b>Slot temporale</b></p>
+                                <p>Fascia oraira</p>
+                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
+                            </button>
+                        </form>
+
                     {% endif %} 
 
             {% endfor %}
@@ -27,29 +37,6 @@
             {% endfor %}
         </div>
       </div>
-
-            
-
-
-    <!-- {% for slot in slots %}
-    <div class="slot m-2"> 
-        <p><b>Slot temporale</b></p>
-        <p>{{ slot.day }} </p>
-        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
-    </div> 
-
-     <input type="time"> 
-
-
-
-    {% endfor %} -->
-    
-    
-    
-    <!-- End calendar -->
-    
-    
-    
     </body>
 
     <form action="/logout" method="POST">

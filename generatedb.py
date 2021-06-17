@@ -5,7 +5,8 @@ from models import Gym, Users
 from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import as_declarative, has_inherited_table, declared_attr
 import datetime
-from datetime import date
+from datetime import date, timedelta
+from models import *
 
 app = Flask (__name__)
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -130,27 +131,22 @@ class Slot(db.Model):
 
 datetime_object = datetime.datetime.now()
 
-db.session.add_all([
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='9:00', hourTo='10:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='10:00', hourTo='11:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='12:00', hourTo='13:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='14:00', hourTo='15:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='16:00', hourTo='17:00'),
-Slot(day=1, date=date(2021, 7, 1), hourFrom='17:00', hourTo='18:00'),
-Slot(day=1, date=date(2021, 7, 1), hourFrom='18:00', hourTo='19:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='19:00', hourTo='20:00'),
-Slot(day=1 ,date=date(2021, 7, 1), hourFrom='20:00', hourTo='21:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='9:00', hourTo='10:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='10:00', hourTo='11:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='12:00', hourTo='13:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='14:00', hourTo='15:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='16:00', hourTo='17:00'),
-Slot(day=2, date=date(2021, 7, 2), hourFrom='17:00', hourTo='18:00'),
-Slot(day=2, date=date(2021, 7, 2), hourFrom='18:00', hourTo='19:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='19:00', hourTo='20:00'),
-Slot(day=2 ,date=date(2021, 7, 2), hourFrom='20:00', hourTo='21:00')
-
-])
+start_date = date(2021, 7, 1)
+end_date = date(2021, 7, 7)
+delta = timedelta(days=1)
+while start_date <= end_date:
+    db.session.add_all([
+        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00'),
+        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00'),
+        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00'),
+    ])
+    start_date += delta
 
 admin = Owner(id=4, email='admin@gmail.com', 
               password='admin', role='owner', 
