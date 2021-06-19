@@ -29,7 +29,7 @@
                                 <form action="/select_slot" method="GET" >
                                     <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="booked_slot">
                                         <p><b>Slot temporale annulla</b></p>
-                                        {{ slot.id }}
+                                        Posti: {{ slot.places }}
                                         <p>Fascia oraira</p>
                                         <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
                                     </button>
@@ -38,7 +38,7 @@
                                 <form action="/select_slot" method="GET" >
                                     <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="free_slot">
                                         <p><b>Slot temporale prenota</b></p>
-                                        {{ slot.id }}
+                                        Posti: {{ slot.places }}
                                         <p>Fascia oraira</p>
                                         <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
                                     </button>

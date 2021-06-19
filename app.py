@@ -1,3 +1,4 @@
+from typing import ContextManager
 from models import *
 from flask import Flask
 from flask import render_template
@@ -5,12 +6,14 @@ from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager, UserMixin, login_user, logout_user
 from login import login_bp
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, load_only
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join
 from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
+from contextlib import contextmanager
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -45,7 +48,6 @@ def load_user(user_id):
     user = Users.query.filter_by(id=user_id).first()
     log('[load_user] Logged user: ',user)
     return user
-
 
 @app.route('/')
 def home ():
@@ -83,11 +85,17 @@ def private ():
 @app.route('/weight_rooms', methods=['GET', 'POST'])
 def weight_rooms():
     #slots = Slot.query.group_by(Slot.day).all()
-    slots = Slot.query.all()
+    slots = session.query(Slot).all()
     days = []
     start_date = date(2021, 7, 1)
     end_date = date(2021, 7, 7)
     delta = timedelta(days=1)
+
+    print('------------------------------ SLOTS ------------------------------')
+    for s in slots:
+        if (s.places <50):
+            print('Slot after with id %d:  places %d', s.id, s.places)
+
     while start_date <= end_date:
         days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
         # print(start_date.day)
@@ -97,7 +105,6 @@ def weight_rooms():
 
     # get all slot booked for current user
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
-
     log('[weight_rooms] booking ids: ', bookings)
     return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings ))
 
@@ -123,11 +130,22 @@ def book_slot():
     log('book_slot user id: ', current_user.id)
     # book slot for this user
     # start transaction
-    booking = Booking(current_user.id, slot_id)
-    db.session.add(booking)
-    db.session.commit()
-    # end transaction
-    return weight_rooms()
+    with get_session() as session:
+        
+        booking = Booking(current_user.id, slot_id) # prenota slot
+
+        db.session.add(booking)
+        #db.session.commit()
+
+        query = session.query(Slot).filter_by(id=slot_id).first()
+
+        query.places = query.places-1
+        log('[book_slot] oldPlaces: ', query.places)
+        # end transaction
+        db.session.commit()
+
+
+    return redirect(url_for('weight_rooms'))
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -166,6 +184,17 @@ def test():
     #safe non viene interpretato come html
     return render_template('profile.html', Users=u)
 
+@contextmanager
+def get_session():
+    session = db.session
+
+    try:
+        yield session
+    except:
+        session.rollback()
+        raise
+    else:
+        session.commit()
 
 if __name__ == '__main__':
     app.run()

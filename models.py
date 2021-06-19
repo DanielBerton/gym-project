@@ -144,10 +144,17 @@ class Slot(db.Model):
     date = db.Column(db.Date)
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
-    places = db.Integer
+    places = db.Column(db.Integer)
+
+    def __init__(self, day, date, hourFrom, hourTo, places):
+        self.day = day
+        self.date = date
+        self.hourFrom = hourFrom
+        self.hourTo = hourTo
+        self.places = places
 
     def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo)
+        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places)
 
 class Calendar:
     def __init__(self, day, month, day_name):

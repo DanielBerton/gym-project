@@ -137,6 +137,18 @@ class Slot(db.Model):
     date = db.Column(db.Date)
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
+    places = db.Column(db.Integer)
+
+    def __init__(self, day, date, hourFrom, hourTo, places):
+                self.day = day
+                self.date = date
+                self.hourFrom = hourFrom
+                self.hourTo = hourTo
+                self.places = places
+                
+    def __repr__(self):
+        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places)
+
 
 
 datetime_object = datetime.datetime.now()
@@ -146,15 +158,15 @@ end_date = date(2021, 7, 7)
 delta = timedelta(days=1)
 while start_date <= end_date:
     db.session.add_all([
-        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00'),
-        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00'),
-        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00'),
-        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00'),
+        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00', places=50),
+        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00', places=50),
+        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00', places=50),
+        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00', places=50),
     ])
     start_date += delta
 
