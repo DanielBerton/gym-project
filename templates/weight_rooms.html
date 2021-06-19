@@ -17,24 +17,40 @@
                     {{ day.day_name }}
                     {{ day.day }} {{ day.month }}
 
+                   
                     {% for slot in slots %}
-                        <!-- check if slot is the same day of calendar -->
-                        {% if slot.day == day.day %}
+                             {# 
+                                <!-- check if slot is the same day of calendar -->
+                            #}
+                            {% if slot.day == day.day %}
+                                <!-- check if the slot is booked from current user -->
+                                
+                                {% if slot.id in bookings  %}
+                                <form action="/select_slot" method="GET" >
+                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="booked_slot">
+                                        <p><b>Slot temporale annulla</b></p>
+                                        {{ slot.id }}
+                                        <p>Fascia oraira</p>
+                                        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="/select_slot" method="GET" >
+                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="free_slot">
+                                        <p><b>Slot temporale prenota</b></p>
+                                        {{ slot.id }}
+                                        <p>Fascia oraira</p>
+                                        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
+                                    </button>
+                                </form>
+                                {% endif %} 
+                            {% endif %} 
                         
-                        
-                        <form action="/select_slot" method="GET" >
-                            <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">
-                                <p><b>Slot temporale</b></p>
-                                <p>Fascia oraira</p>
-                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>            
-                            </button>
-                        </form>
-
-                    {% endif %} 
-
-            {% endfor %}
+                {% endfor %}
+                <!-- end for slots -->
             </div>
-            {% endfor %}
+            {% endfor %} 
+            <!-- end for days -->
         </div>
       </div>
     </body>

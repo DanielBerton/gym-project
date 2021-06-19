@@ -15,7 +15,7 @@ from datetime import date, timedelta
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-engine = create_engine('sqlite:///database.db', echo=True)
+engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
 app.register_blueprint(login_bp)
 
@@ -95,10 +95,11 @@ def weight_rooms():
         #print(start_date.strftime("%Y-%m-%d")+ start_date.strftime('%A') )
         start_date += delta
 
-    print(days)
-  
-    print(slots)
-    return make_response(render_template("weight_rooms.html", slots=slots,days=days ))
+    # get all slot booked for current user
+    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
+
+    log('[weight_rooms] booking ids: ', bookings)
+    return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 def courses():
@@ -122,7 +123,9 @@ def book_slot():
     log('book_slot user id: ', current_user.id)
     # book slot for this user
     # start transaction
-
+    booking = Booking(current_user.id, slot_id)
+    db.session.add(booking)
+    db.session.commit()
     # end transaction
     return weight_rooms()
 

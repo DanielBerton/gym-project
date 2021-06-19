@@ -119,6 +119,16 @@ class Course(db.Model):
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True)
+    user = Column(Integer, ForeignKey('users.id'))
+    slot = Column(Integer, ForeignKey('slot.id'))
+
+    def __init__(self, user, slot):
+            self.user = user
+            self.slot = slot
+    
+    def __repr__(self):
+        return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
+
 
 class Slot(db.Model):
     __tablename__ = 'slot'
@@ -158,17 +168,6 @@ gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice',
 
 room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', gym=gold_gym.id)
 
-
-
-
-
-# inst = inspect(Owner)
-# attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
-# print('-----------------------------------------')
-# print('Owner:')
-# print(attr_names)
-# print('-----------------------------------------')
-
 db.session.add_all([
     Member(id=1, email='alice@gmail.com', password='alice', role='user'),
     Member(id=2, email='daniele@gmail.com', password='daniele', role='user'),
@@ -177,7 +176,6 @@ db.session.add_all([
     room_1,
     admin
 ])
-
 
 db.create_all()
 

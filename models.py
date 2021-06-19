@@ -125,7 +125,18 @@ class Course(db.Model):
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True)
+    user = Column(Integer, ForeignKey('users.id'))
+    slot = Column(Integer, ForeignKey('slot.id'))
 
+    def __init__(self, user, slot):
+            self.user = user
+            self.slot = slot
+    
+    def __repr__(self):
+        return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
+
+
+# non serve scrivelo a db
 class Slot(db.Model):
     __tablename__ = 'slot'
     id = db.Column('id', db.Integer, primary_key = True)
@@ -133,10 +144,10 @@ class Slot(db.Model):
     date = db.Column(db.Date)
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
+    places = db.Integer
 
     def __repr__(self):
         return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo)
-
 
 class Calendar:
     def __init__(self, day, month, day_name):

@@ -7,3 +7,21 @@
     background-color: rgb(177, 175, 175);
     max-width: 120px;
 }
+
+.booked_slot {
+    background-color: rgb(214, 78, 78) !important;
+
+}
+
+.free_slot {
+    background-color: rgb(125, 218, 48) !important;
+}
+
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:visited,
+.btn-primary:focus {
+    background-color: #8064A2;
+    border-color: #8064A2;
+}
