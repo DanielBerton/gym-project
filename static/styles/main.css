@@ -17,6 +17,10 @@
     background-color: rgb(125, 218, 48) !important;
 }
 
+.full_slot {
+    background-color: rgb(230, 157, 29) !important;
+}
+
 .btn-primary,
 .btn-primary:hover,
 .btn-primary:active,

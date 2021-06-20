@@ -13,7 +13,7 @@ from sqlalchemy.sql import select
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-engine = create_engine('sqlite:///database.db', echo=True)
+engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
 app.register_blueprint(login_bp)
 

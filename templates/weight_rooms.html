@@ -36,7 +36,7 @@
                                 </form>
                                 {% else %}
                                 <form action="/select_slot" method="GET" >
-                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="free_slot">
+                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="{{ 'full_slot' if slot.places < 1 else 'free_slot' }}">
                                         <p><b>Slot temporale prenota</b></p>
                                         Posti: {{ slot.places }}
                                         <p>Fascia oraira</p>

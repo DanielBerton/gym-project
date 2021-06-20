@@ -1,12 +1,30 @@
 {% extends "base.html" %}
  {% block pagebody %}
     <a href="{{ url_for('weight_rooms') }}">Torna alla lista</a> <br>
-    <p><b>Prenota Slot</b></p>
-    <p>{{ slot.day }} </p>
-    <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
-    Prenotazione per l'utente: {{ user.email }}
-    <form action="/book_slot" method="GET">
-         
-        <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">Conferma</button>
-    </form>
+
+    {% if is_booked %}
+            <p><b>Disdici Slot</b></p>
+            <p>{{ slot.day }} </p>
+            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+            <p>Posti disponibili: {{ slot.places }}</p>
+            Prenotazione per l'utente: {{ user.email }}
+            <form action="/unbook_slot" method="GET">
+                
+                <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">Disdici prenotazione</button>
+            </form>
+        {% else %}
+            <p><b>Prenota Slot</b></p>
+            <p>{{ slot.day }} </p>
+            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+            Prenotazione per l'utente: {{ user.email }}
+            <p>Posti disponibili: {{ slot.places }}</p>
+            <form action="/book_slot" method="GET">
+                {% if slot.places < 1 %}
+                    <p>Limite posti superato, non è possibile prenotare questo slot</p>
+                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" disabled>Conferma</button>
+                {% else %}
+                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">Conferma</button>
+                {% endif %}
+            </form>
+    {% endif %}
 {% endblock %}

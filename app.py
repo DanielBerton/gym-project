@@ -13,6 +13,7 @@ from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
 from contextlib import contextmanager
+from utils import log, get_session
 
 
 app = Flask(__name__)
@@ -120,7 +121,12 @@ def select_slot():
     slot = Slot.query.filter_by(id=selected_slot).first()
     log(slot)
     user = current_user
-    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user))
+
+    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
+
+    is_booked = slot.id in bookings
+    log('isBooked: ', is_booked)
+    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked))
     return resp
 
 @app.route('/book_slot', methods=['GET', 'POST'])
@@ -140,6 +146,29 @@ def book_slot():
         query = session.query(Slot).filter_by(id=slot_id).first()
 
         query.places = query.places-1
+        log('[book_slot] oldPlaces: ', query.places)
+        # end transaction
+        db.session.commit()
+
+
+    return redirect(url_for('weight_rooms'))
+
+@app.route('/unbook_slot', methods=['GET', 'POST'])
+def unbook_slot():
+    slot_id =request.args.get("slot_id")
+    log('unbook_slot id: ', slot_id)
+    log('unbook_slot user id: ', current_user.id)
+    # book slot for this user
+    # start transaction
+    with get_session() as session:
+
+        # elimina prenotazione slot
+        session.query(Booking).filter_by(slot=slot_id).delete()
+
+        query = session.query(Slot).filter_by(id=slot_id).first()
+
+        # si è liberato il posto, aggiungerlo ai disponibili
+        query.places = query.places+1
         log('[book_slot] oldPlaces: ', query.places)
         # end transaction
         db.session.commit()
@@ -184,24 +213,8 @@ def test():
     #safe non viene interpretato come html
     return render_template('profile.html', Users=u)
 
-@contextmanager
-def get_session():
-    session = db.session
-
-    try:
-        yield session
-    except:
-        session.rollback()
-        raise
-    else:
-        session.commit()
 
 if __name__ == '__main__':
     app.run()
 
-# Logger method
-# param message is optional
-def log(method, message=''):
-    print('---------------------------------')
-    print(method, message)
-    print('---------------------------------')
+    from views import *
