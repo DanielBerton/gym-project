@@ -84,6 +84,7 @@ def private ():
     return resp
 
 @app.route('/weight_rooms', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
 def weight_rooms():
     #slots = Slot.query.group_by(Slot.day).all()
     slots = session.query(Slot).all()
@@ -110,10 +111,12 @@ def weight_rooms():
     return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings ))
 
 @app.route('/courses', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
 def courses():
     return make_response(render_template("courses.html"))
 
 @app.route('/select_slot', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
 def select_slot():
     selected_slot =request.args.get("slot_id")
 
@@ -130,6 +133,7 @@ def select_slot():
     return resp
 
 @app.route('/book_slot', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
 def book_slot():
     slot_id =request.args.get("slot_id")
     log('book_slot id: ', slot_id)
@@ -154,6 +158,7 @@ def book_slot():
     return redirect(url_for('weight_rooms'))
 
 @app.route('/unbook_slot', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
 def unbook_slot():
     slot_id =request.args.get("slot_id")
     log('unbook_slot id: ', slot_id)
