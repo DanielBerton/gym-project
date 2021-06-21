@@ -71,10 +71,10 @@ def private ():
     users = Users.query.all()
     log('[private] users ', users)
 
-    if (user.role == 'admin'):
-        resp = make_response(render_template("admin_dashboard.html", users=users, user=user))
+    if (user.role == 'owner'):
+        resp = make_response(render_template("admin_dashboard.html", users=users, user=user, route=request.path))
     else:
-        resp = make_response(render_template("private.html", users=users, user=user))
+        resp = make_response(render_template("private.html", users=users, user=user, route=request.path))
     #gyms = session.query(Gym, WeightRoom).filter(Gym.id==WeightRoom.gym).all()
 
     golden = session.query(Gym).join(WeightRoom).filter(Gym.id == WeightRoom.gym).first()
@@ -108,12 +108,21 @@ def weight_rooms():
     # get all slot booked for current user
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
-    return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings ))
+    return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings, route=request.path ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def courses():
-    return make_response(render_template("courses.html"))
+    return make_response(render_template("courses.html", route=request.path))
+
+
+@app.route('/admin_dashboard', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def admin_dashboard():
+    log('sssssssssssssssssssssssssssssssss')
+    log(request.path )
+    return make_response(render_template("admin_dashboard.html", route=request.path))
+
 
 @app.route('/select_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -129,7 +138,7 @@ def select_slot():
 
     is_booked = slot.id in bookings
     log('isBooked: ', is_booked)
-    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked))
+    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked,))
     return resp
 
 @app.route('/book_slot', methods=['GET', 'POST'])

@@ -13,6 +13,9 @@
     </head>
     <header>
       <h5 class="m-2" >Gym application</h5>
+      <p>Route = {{route}}</p>
+      <p>User = {{user}}</p>
+
       <!-- Navbar -->
       <nav class="header navbar navbar-expand-lg navbar-light bg-white">
         <div class="container-fluid">
@@ -29,13 +32,21 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarExample01">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item active">
-                <a class="nav-link" aria-current="page" href="{{ url_for('private') }}">Home</a>
-              </li>
-              <li class="nav-item">
+              {# menu dinamico in base all'utente #}
+              
+              {% if user and user.role == "owner"  %}
+                <li class="{{ 'active' if route == '/admin_dashboard' or route == '/private' else '' }} nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('admin_dashboard') }}">Home</a>
+                </li>
+                {% else %}
+                <li class="{{ 'active' if route == '/private' or route == '/admin_dashboard' else '' }} nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('private') }}">Home</a>
+                  </li>
+              {% endif %} 
+              <li class="{{ 'active' if route == '/weight_rooms' else '' }} nav-item">
                 <a class="nav-link" href="{{ url_for('weight_rooms') }}">Sala Pesi</a>
               </li>
-              <li class="nav-item">
+              <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
                 <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>
               </li>
             </ul>
@@ -45,13 +56,14 @@
       <!-- Navbar -->
     </header>
     <body>
-        {% block scripts %}
-          <!-- Optional JavaScript -->
-          {{ bootstrap.load_js() }}
-          
-        {% endblock %}
+      {% block scripts %}
+        <!-- Optional JavaScript -->
+        {{ bootstrap.load_js() }}
         
-        {% block pagebody %}
+      {% endblock %}
+      
+      {% block pagebody %}
+
         {% endblock %}
     </body>
     <footer class="footer">
