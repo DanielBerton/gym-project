@@ -222,12 +222,28 @@ while start_date <= end_date:
 
 ###### Courses ########
 instructor = Instructor(id=2, email='instructor@gmail.com', password='instructor', role='instructor', specialization='Zumba')
+instructor_2 = Instructor(id=10, email='instructor2@gmail.com', password='instructor2', role='instructor', specialization='Calisthenics')
+instructor_3 = Instructor(id=11, email='instructor3@gmail.com', password='instructor3', role='instructor', specialization='Yoga')
 zomba = Course(id=1, name='Zumba Fitness', places=10, gym=gold_gym.id, instructor=instructor.id)
+calisthenics = Course(id=2, name='Calisthenics', places=12, gym=gold_gym.id, instructor=instructor_2.id)
+yoga = Course(id=3, name='Yoga Relax', places=15, gym=gold_gym.id, instructor=instructor_3.id)
+
 l = CourseScheduling(day_of_week='Monday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
 m = CourseScheduling(day_of_week='Wednesday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
 v = CourseScheduling(day_of_week='Friday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
+
+
+l_c = CourseScheduling(day_of_week='Thursday', start_hour='20:00', end_hour='21:00', places=calisthenics.places, course=calisthenics.id)
+m_c = CourseScheduling(day_of_week='Tuesday', start_hour='20:00', end_hour='21:00', places=calisthenics.places, course=calisthenics.id)
+
+l_y = CourseScheduling(day_of_week='Saturday', start_hour='9:00', end_hour='10:00', places=yoga.places, course=yoga.id)
+m_y = CourseScheduling(day_of_week='Wednesday', start_hour='10:00', end_hour='11:00', places=yoga.places, course=yoga.id)
+
+
 db.session.add_all([
-    instructor, zomba, l, m, v
+    instructor, zomba, l, m, v,
+    instructor_2, calisthenics, l_c, m_c,
+    instructor_3, yoga, l_y, m_y
 ])
 ###### END Courses ########
 

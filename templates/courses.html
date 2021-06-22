@@ -13,29 +13,32 @@
                 {% for course in courses %}
     
                     {% if course.day_of_week in day.day_name  %}
-                        <p><b>{{ course.name  }}</b></p>
-                        
-                        <p>{{ course.start_hour  }} - {{ course.end_hour  }}</p>
-                        <p>Posti disponibili: {{ course.places  }}</p>
-                        
-                        {% if course.id in booked_course  %}
-                            <!-- <form action="/unbook_course" method="GET" ></form>
-                                <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="btn btn-outline-warning">
-                                    Elimina
-                                </button>
-                            </form> -->
-                            <form action="/unbook_course" method="GET" >
-                                <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="btn btn-outline-warning">
-                                    Elimina
-                                </button>
-                            </form>
-                        {% else %}
-                            <form action="/book_course" method="GET" >
-                                <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="{{ 'btn-outline-danger' if course.places < 1 else 'btn-outline-success' }} btn">
-                                    Prenota
-                                </button>
-                            </form>
-                        {% endif %} 
+                        <div class="card" style="width: 10rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name  }}</h5>
+                                <p class="card-text">{{ course.start_hour  }} - {{ course.end_hour  }}</p>
+                                <p>Posti disponibili: {{ course.places  }}</p>
+                                {% if course.id in booked_course  %}
+                                    <!-- <form action="/unbook_course" method="GET" ></form>
+                                        <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="btn btn-outline-warning">
+                                            Elimina
+                                        </button>
+                                    </form> -->
+                                    <form action="/unbook_course" method="GET" >
+                                        <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="btn btn-outline-warning">
+                                            Elimina
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="/book_course" method="GET" >
+                                        <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="{{ 'btn-outline-danger' if course.places < 1 else 'btn-outline-success' }} btn">
+                                            Prenota
+                                        </button>
+                                    </form>
+                                {% endif %} 
+                            </div>
+                        </div>
+                                                
                     {% endif %} 
                 {% endfor %}
             </div>
@@ -43,9 +46,4 @@
     </div>
  </div>
 
-
-    <form action="/private" method="POST">
-        Logout 
-        <input type="submit">
-    </form>
 {% endblock %}

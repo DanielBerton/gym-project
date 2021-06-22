@@ -59,7 +59,7 @@ def home ():
     log(current_user.is_authenticated)
     if current_user.is_authenticated:
         return redirect(url_for('private')) 
-    return render_template("login.html")
+    return render_template("login.html", route='login')
 
 @app.route('/private')
 @login_required # richiede autenticazione
@@ -105,15 +105,14 @@ def weight_rooms():
     # get all slot booked for current user
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
-    return make_response(render_template("weight_rooms.html", slots=slots,days=days, bookings=bookings, route=request.path ))
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def courses():
     
-    courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).all()
-    
-    print(courses)
+    # order by start course
+    courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
 
     days = []
     start_date = date(2021, 7, 1)
@@ -128,7 +127,7 @@ def courses():
     booked_course = [r.course_scheduling for r in session.query(BookingCourse.course_scheduling).filter_by(member=current_user.id)]
 
     log(booked_course)
-    return make_response(render_template("courses.html", route=request.path, courses=courses, days=days, booked_course=booked_course))
+    return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course))
 
 @app.route('/book_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -183,7 +182,7 @@ def unbook_course():
 @login_required # richiede autenticazione
 def admin_dashboard():
     log(request.path )
-    return make_response(render_template("admin_dashboard.html", route=request.path))
+    return make_response(render_template("admin_dashboard.html", user=current_user, route=request.path))
 
 @app.route('/select_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione

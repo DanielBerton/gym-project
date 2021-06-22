@@ -12,48 +12,56 @@
         <title>Gym app</title>
     </head>
     <header>
-      <h5 class="m-2" >Gym application</h5>
-      <p>Route = {{route}}</p>
-      <p>User = {{user}}</p>
-
+      {% if route != 'login'  %}
+      
       <!-- Navbar -->
-      <nav class="header navbar navbar-expand-lg navbar-light bg-white">
-        <div class="container-fluid">
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-mdb-toggle="collapse"
-            data-mdb-target="#navbarExample01"
-            aria-controls="navbarExample01"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <i class="fas fa-bars"></i>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarExample01">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              {# menu dinamico in base all'utente #}
-              
-              {% if user and user.role == "owner"  %}
-                <li class="{{ 'active' if route == '/admin_dashboard' or route == '/private' else '' }} nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('admin_dashboard') }}">Home</a>
-                </li>
-                {% else %}
-                <li class="{{ 'active' if route == '/private' or route == '/admin_dashboard' else '' }} nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('private') }}">Home</a>
+      
+        <nav class="header navbar navbar-expand-lg navbar-dark bg-dark">
+          <a class="navbar-brand" href="#">
+            <img src="https://www.goldsgym.com/assets/dist/img/logo/notext/fullcolor.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+            Gym application
+          </a>
+          <div class="container-fluid">
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-mdb-toggle="collapse"
+              data-mdb-target="#navbarExample01"
+              aria-controls="navbarExample01"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarExample01">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {# menu dinamico in base all'utente #}
+                
+                {% if user and user.role == "owner"  %}
+                  <li class="{{ 'active' if route == '/admin_dashboard' or route == '/private' else '' }} nav-item">
+                      <a class="nav-link" aria-current="page" href="{{ url_for('admin_dashboard') }}">Home</a>
                   </li>
-              {% endif %} 
-              <li class="{{ 'active' if route == '/weight_rooms' else '' }} nav-item">
-                <a class="nav-link" href="{{ url_for('weight_rooms') }}">Sala Pesi</a>
-              </li>
-              <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
-                <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>
-              </li>
-            </ul>
+                  {% else %}
+                  <li class="{{ 'active' if route == '/private' or route == '/admin_dashboard' else '' }} nav-item">
+                      <a class="nav-link" aria-current="page" href="{{ url_for('private') }}">Home</a>
+                    </li>
+                {% endif %} 
+                <li class="{{ 'active' if route == '/weight_rooms' else '' }} nav-item">
+                  <a class="nav-link" href="{{ url_for('weight_rooms') }}">Sala Pesi</a>
+                </li>
+                <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
+                  <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>
+                </li>
+              </ul>
+            </div>
+            <span class="user">Ciao {{user.email}}</span>
           </div>
-        </div>
-      </nav>
-      <!-- Navbar -->
+          <form action="/logout" method="POST" class="form-inline my-2 my-lg-0">
+            <button class="btn btn-outline-light" type="submit">Logout</button>
+          </form>
+        </nav>
+        <!-- Navbar -->
+        {% endif %} 
     </header>
     <body>
       {% block scripts %}
