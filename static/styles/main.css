@@ -33,3 +33,15 @@
     background-color: #8064A2;
     border-color: #8064A2;
 }
+
+.container {
+    padding-bottom: 100px;
+}
+
+.show {
+    display: block;
+}
+
+.hide {
+    display: none;
+}

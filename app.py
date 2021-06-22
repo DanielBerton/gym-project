@@ -111,6 +111,7 @@ def weight_rooms():
 @login_required # richiede autenticazione
 def courses():
     
+    status = request.args.get("status")
     # order by start course
     courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
 
@@ -127,7 +128,7 @@ def courses():
     booked_course = [r.course_scheduling for r in session.query(BookingCourse.course_scheduling).filter_by(member=current_user.id)]
 
     log(booked_course)
-    return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course))
+    return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course, status=status))
 
 @app.route('/book_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -150,8 +151,8 @@ def book_course():
         log('[book_slot] oldPlaces: ', course_scheduling.places)
         # end transaction
         db.session.commit()
-
-    return redirect(url_for('courses'))     
+    status = 'booked'
+    return redirect(url_for('courses', status=status))     
 
 
 @app.route('/unbook_course', methods=['GET', 'POST'])
@@ -174,9 +175,8 @@ def unbook_course():
         log('[unbook_course] oldPlaces: ', query.places)
         # end transaction
         db.session.commit()
-
-
-    return redirect(url_for('courses'))
+    status = 'unbooked'
+    return redirect(url_for('courses', status=status))
 
 @app.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
