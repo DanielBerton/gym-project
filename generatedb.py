@@ -16,7 +16,7 @@ metadata = MetaData()
 
 db = SQLAlchemy(app)
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'users'
     __table_args__ = (
         db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
@@ -52,6 +52,7 @@ class Owner(Users):
         self.surname = surname
         self.company_name = company_name
 
+
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
 
@@ -67,8 +68,13 @@ class Instructor(Users, db.Model):
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     specialization = db.Column(db.String(100))
 
+    def __init__(self, id, email, password, role, specialization):
+        super().__init__(id, email, password, role)
+        print('inside super: '+ specialization)
+        self.specialization = specialization
+
     def __repr__(self):
-        return "<Instructor(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
+        return "<Instructor(id='%s', email='%s', password='%s', role='%s', specialization='%s')>" % (self.id, self.email, self.password, self.role, self.specialization)
 
 
 class Gym(db.Model):
@@ -96,7 +102,6 @@ class WeightRoom(db.Model):
     places = db.Integer
     gym = Column(Integer, ForeignKey('gym.id'))
 
-
     def __init__(self, id, name, size, places, gym):
         self.id = id
         self.name = name
@@ -109,13 +114,50 @@ class Course(db.Model):
     name = db.Column(db.String(100))
     places = db.Integer
     gym = Column(Integer, ForeignKey('gym.id'))
+    instructor = Column(Integer, ForeignKey('instructor.id'))
 
-    def __init__(self, id, name, places, gym):
+    def __init__(self, id, name, places, gym, instructor):
         self.id = id
         self.name = name
         self.places = places
         self.gym = gym
+        self.instructor = instructor
 
+class CourseScheduling(db.Model):
+    __tablename__ = 'course_scheduling'
+    id = db.Column('id', db.Integer, primary_key = True)
+    day_of_week = db.Column(db.String(50))
+    start_hour = db.Column(db.String(50))
+    end_hour = db.Column(db.String(50))
+    places = db.Column(db.Integer)
+    course = Column(Integer, ForeignKey('course.id'))
+
+    def __init__(self, day_of_week, start_hour, end_hour, places, course):
+            self.day_of_week = day_of_week
+            self.start_hour = start_hour
+            self.end_hour = end_hour
+            self.places = places
+            self.course = course
+    
+    def __repr__(self):
+        return "<CourseScheduling(id='%s', day_of_week='%s', start_hour='%s',  end_hour='%s', places='%d', course='%s')>" % (self.id, self.day_of_week, self.start_hour,  self.end_hour, self.places, self.course)
+
+#course_schedulin
+class BookingCourse(db.Model):
+    __tablename__ = 'booking_course'
+    id = db.Column('id', db.Integer, primary_key = True)
+    member = Column(Integer, ForeignKey('member.id'))
+    course_scheduling = Column(Integer, ForeignKey('course_scheduling.id'))
+
+    def __init__(self, member, course_scheduling):
+            self.member = member
+            self.course_scheduling = course_scheduling
+    
+    def __repr__(self):
+        return "<BookingCourse(id='%s', member='%s', course_scheduling='%s')>" % (self.id, self.member, self.course_scheduling)
+
+
+# Gym slot booking
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True)
@@ -130,6 +172,7 @@ class Booking(db.Model):
         return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
 
 
+# non serve scrivelo a db
 class Slot(db.Model):
     __tablename__ = 'slot'
     id = db.Column('id', db.Integer, primary_key = True)
@@ -138,52 +181,59 @@ class Slot(db.Model):
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
     places = db.Column(db.Integer)
+    gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, day, date, hourFrom, hourTo, places):
-                self.day = day
-                self.date = date
-                self.hourFrom = hourFrom
-                self.hourTo = hourTo
-                self.places = places
-                
+    def __init__(self, day, date, hourFrom, hourTo, places, gym):
+            self.day = day
+            self.date = date
+            self.hourFrom = hourFrom
+            self.hourTo = hourTo
+            self.places = places
+            self.gym = gym
+
     def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places)
+        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', gym='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.gym)
 
 
-
-datetime_object = datetime.datetime.now()
-
-start_date = date(2021, 7, 1)
-end_date = date(2021, 7, 7)
-delta = timedelta(days=1)
-while start_date <= end_date:
-    db.session.add_all([
-        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00', places=50),
-        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00', places=50),
-        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00', places=50),
-        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00', places=50),
-    ])
-    start_date += delta
-
-admin = Owner(id=4, email='admin@gmail.com', 
-              password='admin', role='owner', 
-              name='admin', surname='admin', 
-              company_name='')
-print(admin.id)
+        
+admin = Owner(id=1, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name='')
 
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
 room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', gym=gold_gym.id)
 
+datetime_object = datetime.datetime.now()
+start_date = date(2021, 7, 1)
+end_date = date(2021, 7, 7)
+delta = timedelta(days=1)
+while start_date <= end_date:
+    db.session.add_all([
+        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00', places=50, gym=gold_gym.id),
+        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00', places=50, gym=gold_gym.id),
+    ])
+    start_date += delta
+
+###### Courses ########
+instructor = Instructor(id=2, email='instructor@gmail.com', password='instructor', role='instructor', specialization='Zumba')
+zomba = Course(id=1, name='Zumba Fitness', places=10, gym=gold_gym.id, instructor=instructor.id)
+l = CourseScheduling(day_of_week='Monday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
+m = CourseScheduling(day_of_week='Wednesday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
+v = CourseScheduling(day_of_week='Friday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
 db.session.add_all([
-    Member(id=1, email='alice@gmail.com', password='alice', role='user'),
-    Member(id=2, email='daniele@gmail.com', password='daniele', role='user'),
-    Instructor(id=3, email='daniele2@gmail.com', password='daniele', role='intructor'),
+    instructor, zomba, l, m, v
+])
+###### END Courses ########
+
+db.session.add_all([
+    Member(id=3, email='alice@gmail.com', password='alice', role='user'),
+    Member(id=4, email='daniele@gmail.com', password='daniele', role='user'),
     gold_gym,
     room_1,
     admin
@@ -205,6 +255,5 @@ print (metadata.tables.keys())
 for u in owners:
     print (u)
 
-# for u in users:
-#     print (u)
+
 

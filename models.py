@@ -73,8 +73,13 @@ class Instructor(Users, db.Model):
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     specialization = db.Column(db.String(100))
 
+    def __init__(self, id, email, password, role, specialization):
+        super().__init__(id, email, password, role)
+        print('inside super: '+ specialization)
+        self.specialization = specialization
+
     def __repr__(self):
-        return "<Instructor(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
+        return "<Instructor(id='%s', email='%s', password='%s', role='%s', specialization='%s')>" % (self.id, self.email, self.password, self.role, self.specialization)
 
 
 class Gym(db.Model):
@@ -102,7 +107,6 @@ class WeightRoom(db.Model):
     places = db.Integer
     gym = Column(Integer, ForeignKey('gym.id'))
 
-
     def __init__(self, id, name, size, places, gym):
         self.id = id
         self.name = name
@@ -111,17 +115,54 @@ class WeightRoom(db.Model):
         self.gym = gym
 
 class Course(db.Model):
-        id = db.Column('id', db.Integer, primary_key = True)
-        name = db.Column(db.String(100))
-        places = db.Integer
-        gym = Column(Integer, ForeignKey('gym.id'))
+    id = db.Column('id', db.Integer, primary_key = True)
+    name = db.Column(db.String(100))
+    places = db.Integer
+    gym = Column(Integer, ForeignKey('gym.id'))
+    instructor = Column(Integer, ForeignKey('instructor.id'))
 
-        def __init__(self, id, name, places, gym):
-            self.id = id
-            self.name = name
+    def __init__(self, id, name, places, gym, instructor):
+        self.id = id
+        self.name = name
+        self.places = places
+        self.gym = gym
+        self.instructor = instructor
+
+class CourseScheduling(db.Model):
+    __tablename__ = 'course_scheduling'
+    id = db.Column('id', db.Integer, primary_key = True)
+    day_of_week = db.Column(db.String(50))
+    start_hour = db.Column(db.String(50))
+    end_hour = db.Column(db.String(50))
+    places = db.Column(db.Integer)
+    course = Column(Integer, ForeignKey('course.id'))
+
+    def __init__(self, day_of_week, start_hour, end_hour, places, course):
+            self.day_of_week = day_of_week
+            self.start_hour = start_hour
+            self.end_hour = end_hour
             self.places = places
-            self.gym = gym
+            self.course = course
+    
+    def __repr__(self):
+        return "<CourseScheduling(id='%s', day_of_week='%s', start_hour='%s',  end_hour='%s', places='%s', course='%s')>" % (self.id, self.day_of_week, self.start_hour,  self.end_hour, self.places, self.course)
 
+#booking_course
+class BookingCourse(db.Model):
+    #__tablename__ = 'booking_course'
+    id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
+    member = Column(Integer, ForeignKey('member.id'))
+    course_scheduling = Column(Integer, ForeignKey('course_scheduling.id'))
+
+    def __init__(self, member, course_scheduling):
+            self.member = member
+            self.course_scheduling = course_scheduling
+    
+    def __repr__(self):
+        return "<BookingCourse(id='%d', member='%s', course_scheduling='%s')>" % (self.id, self.member, self.course_scheduling)
+
+
+# Gym slot booking
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True)
@@ -145,16 +186,18 @@ class Slot(db.Model):
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
     places = db.Column(db.Integer)
+    gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, day, date, hourFrom, hourTo, places):
-        self.day = day
-        self.date = date
-        self.hourFrom = hourFrom
-        self.hourTo = hourTo
-        self.places = places
+    def __init__(self, day, date, hourFrom, hourTo, places, gym):
+            self.day = day
+            self.date = date
+            self.hourFrom = hourFrom
+            self.hourTo = hourTo
+            self.places = places
+            self.gym = gym
 
     def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places)
+        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', gym='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.gym)
 
 class Calendar:
     def __init__(self, day, month, day_name):

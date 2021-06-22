@@ -6,7 +6,7 @@ from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager, UserMixin, login_user, logout_user
 from login import login_bp
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker, load_only
+from sqlalchemy.orm import sessionmaker, load_only, aliased
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join
 from sqlalchemy.sql import select
@@ -14,6 +14,7 @@ from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
 from contextlib import contextmanager
 from utils import log, get_session
+
 
 
 app = Flask(__name__)
@@ -92,7 +93,6 @@ def weight_rooms():
     start_date = date(2021, 7, 1)
     end_date = date(2021, 7, 7)
     delta = timedelta(days=1)
-
     print('------------------------------ SLOTS ------------------------------')
     for s in slots:
         if (s.places <50):
@@ -100,9 +100,6 @@ def weight_rooms():
 
     while start_date <= end_date:
         days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
-        # print(start_date.day)
-        # print(start_date.strftime('%A'))
-        #print(start_date.strftime("%Y-%m-%d")+ start_date.strftime('%A') )
         start_date += delta
 
     # get all slot booked for current user
@@ -113,16 +110,80 @@ def weight_rooms():
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def courses():
-    return make_response(render_template("courses.html", route=request.path))
+    
+    courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).all()
+    
+    print(courses)
 
+    days = []
+    start_date = date(2021, 7, 1)
+    end_date = date(2021, 7, 7)
+    delta = timedelta(days=1)
+
+    while start_date <= end_date:
+        days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        start_date += delta
+
+
+    booked_course = [r.course_scheduling for r in session.query(BookingCourse.course_scheduling).filter_by(member=current_user.id)]
+
+    log(booked_course)
+    return make_response(render_template("courses.html", route=request.path, courses=courses, days=days, booked_course=booked_course))
+
+@app.route('/book_course', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def book_course():
+    select_course =request.args.get("course_id")
+
+    # start transaction
+    with get_session() as session:
+        booking = BookingCourse(current_user.id, select_course) # prenota slot
+
+        db.session.add(booking)
+        db.session.commit()
+
+        #b = db.session.query(BookingCourse).all()
+        print(booking)
+        course_scheduling = db.session.query(CourseScheduling).filter_by(id=select_course).first()
+        #query = session.query(CourseScheduling).filter_by(id=course_scheduling_id).first()
+
+        course_scheduling.places = course_scheduling.places-1
+        log('[book_slot] oldPlaces: ', course_scheduling.places)
+        # end transaction
+        db.session.commit()
+
+    return redirect(url_for('courses'))     
+
+
+@app.route('/unbook_course', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def unbook_course():
+    select_course =request.args.get("course_id")
+    log('unbook_course id: ', select_course)
+    log('unbook_course user id: ', current_user.id)
+    # book slot for this user
+    # start transaction
+    with get_session() as session:
+
+        # elimina prenotazione slot
+        session.query(BookingCourse).filter_by(course_scheduling=select_course).delete()
+
+        query = session.query(CourseScheduling).filter_by(id=select_course).first()
+
+        # si è liberato il posto, aggiungerlo ai disponibili
+        query.places = query.places+1
+        log('[unbook_course] oldPlaces: ', query.places)
+        # end transaction
+        db.session.commit()
+
+
+    return redirect(url_for('courses'))
 
 @app.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def admin_dashboard():
-    log('sssssssssssssssssssssssssssssssss')
     log(request.path )
     return make_response(render_template("admin_dashboard.html", route=request.path))
-
 
 @app.route('/select_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -183,7 +244,7 @@ def unbook_slot():
 
         # si è liberato il posto, aggiungerlo ai disponibili
         query.places = query.places+1
-        log('[book_slot] oldPlaces: ', query.places)
+        log('[unbook_slot] oldPlaces: ', query.places)
         # end transaction
         db.session.commit()
 
