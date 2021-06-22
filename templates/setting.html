@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+ {% block pagebody %}
+
+ <!-- <form method ="post" action="/">
+    <button type="submit" name="submit_a" value="submit_a"> Submit_a </button>
+    <button type="submit" name="submit_b" value="submit_b"> Submit_b </button>
+  </form>  -->
+    
+    <h5 class="m-2">Configurazione</h5>
+    <!-- <h5 class="m-2">Sala pesi <h5> -->
+    <!-- Start calendar --> 
+    <div class="container">
+        <h2>Configurazione <span class="badge badge-secondary">Sale</span></h2>
+        <div class="border border-success p-24">
+            <div class="row">
+                    {% for weight_room in weight_rooms %}
+                        <div class="col-sm">
+                            <h4>Sala pesi {{ weight_room.name }}</h4>
+                            <form action="/update_weight_room" method="POST">
+                                <input name="id"  value="{{ weight_room.id }}" style="display: none;">
+                                <div class="form-group">
+                                    <label>Nome sala</label>
+                                    <input type="text" class="form-control" name="name"  placeholder="Nome sala" value="{{ weight_room.name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Dimensioni sala</label>
+                                    <input type="number" class="form-control" name="size" placeholder="Dimensioni" value="{{ weight_room.size }}">
+                                    <small class="form-text text-muted">Le dimensioni sono espresse in mq.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Posti sala</label>
+                                    <input type="number" class="form-control" name="places" placeholder="Posti" value="{{ weight_room.places }}">
+                                    <small class="form-text text-muted">Si intendono i posti per ogni singolo slot.</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Modifica impostazioni sala</button>
+                            </form>
+                        </div>
+                    {% endfor %}  
+            </div>
+        </div>
+
+        <hr class="my-12"/>
+        <h2>Configurazione <span class="badge badge-secondary">Corsi</span></h2>
+            <div class="border border-primary p-24">
+                <div class="row">
+                    {% for course in courses %}
+                
+                        <div class="col-sm">
+                            <h4>Corso {{ course.name }}</h4>
+                            <form action="/update_course" method="POST">
+                                <input name="id"  value="{{ course.id }}" style="display: none;">
+                                <div class="form-group">
+                                    <label for="courseName">Nome corso</label>
+                                    <input type="text" class="form-control" name="course_name" placeholder="Nome sala" value="{{ course.name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coursePlaces">Posti corso</label>
+                                    <input type="number" class="form-control" name="course_places" placeholder="Posti" value="{{ course.places }}">
+                                    <small  class="form-text text-muted">Si intendono i posti per ogni singolo corso.</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Modifica impostazioni corso</button>
+                            </form>
+                        </div>
+                        {% endfor %} 
+                </div>
+        </div>
+        <hr class="my-12"/>
+        <h2>Configurazione <span class="badge badge-secondary">Extra</span></h2>
+            <form action="/set_week_limit" method="POST">
+                <div class="form-group">
+                    <label >Limite accessi settimanale</label>
+                    <input type="number" class="form-control" name="week_limit" placeholder="4 ..." max="168">
+                    <small  class="form-text text-muted">Imposta limite di accessi alla sala pesi settimanali per utente</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Imposta limite</button>
+            </form>
+            <form action="/set_daily_limit" method="POST">
+                <div class="form-group">
+                    <label >Limite orario</label>
+                    <input type="number" class="form-control" name="daily_limit" placeholder="3 ..." max="24">
+                    <small class="form-text text-muted">Imposta limite di ore giornaliere alla sala pesi per utente</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Imposta limite</button>
+            </form>
+
+      </div>
+    </body>
+
+{% endblock %}

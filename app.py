@@ -8,7 +8,7 @@ from login import login_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, load_only, aliased
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import join
+from sqlalchemy import join, update
 from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
@@ -198,7 +198,15 @@ def select_slot():
 
     is_booked = slot.id in bookings
     log('isBooked: ', is_booked)
-    resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked,))
+
+
+    if (user.role == 'owner'):
+        # prendiamo tuttgli gli utenti che hanno prenotato questo slot
+        booking_list = session.query(Booking, Users.email).filter_by(slot=slot.id, user=Users.id).all()
+        resp = make_response(render_template("booking_list.html", slot=slot,user=user, booking_list=booking_list))
+    else:
+        resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked))
+
     return resp
 
 @app.route('/book_slot', methods=['GET', 'POST'])
@@ -249,6 +257,78 @@ def unbook_slot():
 
 
     return redirect(url_for('weight_rooms'))
+
+@app.route('/setting', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def setting():
+    
+    #courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
+    courses = session.query(Course).all()
+    weight_rooms = db.session.query(WeightRoom).all()
+
+    # fare join con Gym e con proprietario
+    
+    return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user))
+
+
+@app.route('/update_weight_room', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def update_weight_room():
+    
+    if request.method == 'POST':
+
+        name = request.form['name']
+        size = request.form['size']
+        places = request.form['places']
+        id = request.form['id']
+
+        with get_session() as session:
+            wr = session.query(WeightRoom).filter_by(id=id).first()
+            wr.places = places
+            wr.size = size
+            wr.name = name
+
+            slots = session.query(Slot).filter_by(weight_room=id).all()
+            for slot in slots:
+                slot.places = places
+    
+    return redirect(url_for('setting'))
+
+@app.route('/update_course', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def update_course():
+    
+    if request.method == 'POST':
+
+        course_name = request.form['course_name']
+        course_places = request.form['course_places']
+        course_id = request.form['id']
+
+        with get_session() as session:
+            wr = session.query(Course).filter_by(id=course_id).first()
+            wr.places = course_places
+            wr.name = course_name
+
+            course_schedulings = session.query(CourseScheduling).filter_by(course=course_id).all()
+            for course_scheduling in course_schedulings:
+                course_scheduling.places = course_places
+    
+    return redirect(url_for('setting'))
+
+@app.route('/set_week_limit', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def set_week_limit():
+    week_limit = request.form['week_limit']
+    log('set_daily_limit', week_limit)
+    return redirect(url_for('setting'))
+
+@app.route('/set_daily_limit', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def set_daily_limit():
+    
+    daily_limit = request.form['daily_limit']
+    log('set_daily_limit', daily_limit)
+    return redirect(url_for('setting'))
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

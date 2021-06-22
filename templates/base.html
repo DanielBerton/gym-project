@@ -52,6 +52,11 @@
                 <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
                   <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>
                 </li>
+                {% if user and user.role == "owner"  %}
+                  <li class="{{ 'active' if route == '/setting' else '' }}  nav-item">
+                    <a class="nav-link" href="{{ url_for('setting') }}">Configurazione</a>
+                  </li>
+                {% endif %} 
               </ul>
             </div>
             <span class="user">Ciao {{user.email}}</span>

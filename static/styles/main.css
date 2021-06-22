@@ -45,3 +45,7 @@
 .hide {
     display: none;
 }
+
+.p-24 {
+    padding: 24px;
+}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+ {% block pagebody %}
+    <a href="{{ url_for('weight_rooms') }}">Torna alla lista</a> <br>
+
+    <h3>Lista utenti con prenotazione</h3>
+    <ul class="list-group">
+             {% for book in booking_list %}
+                <li class="list-group-item">{{book.email}}</li>
+            {% endfor %}  
+    </ul>
+{% endblock %}
