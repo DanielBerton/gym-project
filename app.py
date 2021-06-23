@@ -14,7 +14,7 @@ from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
 from contextlib import contextmanager
 from utils import log, get_session
-
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -64,7 +64,7 @@ def home ():
 @app.route('/private')
 @login_required # richiede autenticazione
 def private ():
-
+    
     if current_user.is_authenticated:
         log('is_authenticated')
         user = current_user
@@ -84,14 +84,78 @@ def private ():
     log(golden)
     return resp
 
+@app.route('/next', methods=['GET', 'POST'])
+def next():
+    log('next')
+    slots = session.query(Slot).all()
+    days = []
+
+    date_str =request.args.get("start_date").split("-", 2)
+    s = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+    end_date = s
+
+    start_date = s-timedelta(days=3)
+
+    print('------------------------------ LOOOOOOOOOK ------------------------------')
+    print(start_date)
+    print(end_date)
+    
+    # start_date = start_date+timedelta(days=1)
+    # end_date = end_date+timedelta(days=1)
+    delta = timedelta(days=1)
+
+    while start_date <= end_date:
+        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        start_date += delta
+
+    # get all slot booked for current user
+    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
+    log('[weight_rooms] booking ids: ', bookings)
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date ))
+
+
+@app.route('/previous', methods=['GET', 'POST'])
+def previous():
+    log('previous')
+    slots = session.query(Slot).all()
+    days = []
+
+    date_str =request.args.get("start_date").split("-", 2)
+    s = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+    end_date = s
+
+    start_date = s-timedelta(days=5)
+    end_date = s-timedelta(days=2)
+
+    print('------------------------------ LOOOOOOOOOK ------------------------------')
+    print(start_date)
+    print(end_date)
+    
+    # start_date = start_date+timedelta(days=1)
+    # end_date = end_date+timedelta(days=1)
+    delta = timedelta(days=1)
+
+    while start_date <= end_date:
+        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        start_date += delta
+
+    # get all slot booked for current user
+    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
+    log('[weight_rooms] booking ids: ', bookings)
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date ))
+
 @app.route('/weight_rooms', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def weight_rooms():
-    #slots = Slot.query.group_by(Slot.day).all()
+
+    print('Before #########################################')
+
+    start_date = date.today()
+    end_date = date.today()+timedelta(days=3)
+
+    print(start_date)
     slots = session.query(Slot).all()
     days = []
-    start_date = date(2021, 7, 1)
-    end_date = date(2021, 7, 7)
     delta = timedelta(days=1)
     print('------------------------------ SLOTS ------------------------------')
     for s in slots:
@@ -99,13 +163,13 @@ def weight_rooms():
             print('Slot after with id %d:  places %d', s.id, s.places)
 
     while start_date <= end_date:
-        days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
         start_date += delta
 
     # get all slot booked for current user
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path ))
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -116,12 +180,17 @@ def courses():
     courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
 
     days = []
+    print('Before #########################################')
     start_date = date(2021, 7, 1)
     end_date = date(2021, 7, 7)
+
+    # start_date = date.today()
+    # end_date = date.today()+timedelta(days=4)
+
     delta = timedelta(days=1)
 
     while start_date <= end_date:
-        days.append(Calendar(day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
         start_date += delta
 
 

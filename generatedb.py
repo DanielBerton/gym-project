@@ -202,8 +202,8 @@ gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice',
 room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
-start_date = date(2021, 7, 1)
-end_date = date(2021, 7, 7)
+start_date = date.today()-timedelta(days=4)
+end_date = date(2021, 12, 31)
 delta = timedelta(days=1)
 while start_date <= end_date:
     db.session.add_all([

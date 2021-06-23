@@ -7,30 +7,47 @@
   </form>  -->
     
     <h5 class="m-2">Sala pesi</h5>
-    <!-- <h5 class="m-2">Sala pesi <h5> -->
+    
     <!-- Start calendar --> 
     <div class="container">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item">
+                <form action="/previous" method="GET" >
+                    <button type="submit" class="page-link" name="start_date" id="start_date" value="{{start_date}}">Previous</button>
+                </form>
+              </li>
+              <li class="page-item">
+                <form action="{{ url_for('weight_rooms') }}" method="GET" >
+                    <button type="submit" class="page-link">1</button>
+                </form>
+                </li>
+              <li class="page-item">
+                <form action="/next" method="GET" >
+                    <button type="submit" class="page-link" name="start_date" id="start_date" value="{{start_date}}" >Next</button>
+                </form>
+                </li>
+            </ul>
+          </nav>
         <div class="row">
             {% for day in days %}
                 <div class="col-sm">
             
                     {{ day.day_name }}
                     {{ day.day }} {{ day.month }}
-
                    
                     {% for slot in slots %}
                              {# 
                                 <!-- check if slot is the same day of calendar -->
                             #}
-                            {% if slot.day == day.day %}
+                            {% if slot.date == day.date %}
                                 <!-- check if the slot is booked from current user -->
-                                
                                 {% if slot.id in bookings  %}
 
-                                <div class="card pb-10" style="width: 14rem;">
+                                <div class="card mt-10" style="width: 14rem;">
                                     <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
                                     <div class="card-body">
-                                      <h5 class="card-title">Slot temporale disdici</h5>
+                                      <h5 class="card-title">Disdici Slot</h5>
                                       <p class="card-text">Fascia oraira</p>
                                       <p>Posti: {{ slot.places }}</p>
                                       <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
@@ -90,10 +107,10 @@
                                     #}
 
 
-                                <div class="card pb-10" style="width: 14rem;">
+                                <div class="card mt-10" style="width: 14rem;">
                                     <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
                                     <div class="card-body">
-                                      <h5 class="card-title">Slot temporale annulla</h5>
+                                      <h5 class="card-title">Prenota Slot</h5>
                                       <p class="card-text">Fascia oraira</p>
                                       <p>Posti: {{ slot.places }}</p>
                                       <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>

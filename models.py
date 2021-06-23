@@ -204,7 +204,8 @@ class Booking(db.Model):
         return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
 
 class Calendar:
-    def __init__(self, day, month, day_name):
+    def __init__(self, date, day, month, day_name):
+        self.date = date
         self.day = day
         self.month = month
         self.day_name = day_name
