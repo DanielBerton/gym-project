@@ -3,13 +3,13 @@
     
  <div class="container">
     <div class="alert alert-success alert-dismissible fade show {{ 'show' if status == 'booked' else 'hide' }}" role="alert" >
-        <strong>Posto prenotato! {{status}}</strong>
+        <strong>Posto prenotato!</strong>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="alert alert-warning alert-dismissible fade show {{ 'show' if status == 'unbooked' else 'hide' }}" role="alert" >
-        <strong>Prenotazione rimossa! {{status}}</strong>
+        <strong>Prenotazione rimossa!</strong>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
