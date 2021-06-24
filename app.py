@@ -1,4 +1,5 @@
 from typing import ContextManager
+from utils.util import get_session
 from models import *
 from flask import Flask
 from flask import render_template
@@ -13,8 +14,9 @@ from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
 from contextlib import contextmanager
-from utils import log, get_session
+from utils import log, transaction
 from datetime import datetime
+from sqlalchemy import DDL, event, func
 
 
 app = Flask(__name__)
@@ -32,10 +34,10 @@ app.config['SECRET_KEY'] = 'ubersecret'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-Session = sessionmaker(bind = engine)
+Session = sessionmaker(bind = engine, autoflush=True)
 session = Session()
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, session_options={"autoflush": True})
 
 def get_user_by_email(email):
     log('[get_user_by_email] executed', '')
@@ -148,8 +150,6 @@ def previous():
 @login_required # richiede autenticazione
 def weight_rooms():
 
-    print('Before #########################################')
-
     start_date = date.today()
     end_date = date.today()+timedelta(days=3)
 
@@ -158,9 +158,6 @@ def weight_rooms():
     days = []
     delta = timedelta(days=1)
     print('------------------------------ SLOTS ------------------------------')
-    for s in slots:
-        if (s.places <50):
-            print('Slot after with id %d:  places %d', s.id, s.places)
 
     while start_date <= end_date:
         days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
@@ -217,12 +214,11 @@ def book_course():
         #query = session.query(CourseScheduling).filter_by(id=course_scheduling_id).first()
 
         course_scheduling.places = course_scheduling.places-1
-        log('[book_slot] oldPlaces: ', course_scheduling.places)
+        log('[book_course] oldPlaces: ', course_scheduling.places)
         # end transaction
         db.session.commit()
     status = 'booked'
     return redirect(url_for('courses', status=status))     
-
 
 @app.route('/unbook_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -282,26 +278,139 @@ def select_slot():
 @login_required # richiede autenticazione
 def book_slot():
     slot_id =request.args.get("slot_id")
+    log('############################################### book_slot ###############################################')
+
     log('book_slot id: ', slot_id)
     log('book_slot user id: ', current_user.id)
     # book slot for this user
     # start transaction
-    with get_session() as session:
-        
-        booking = Booking(current_user.id, slot_id) # prenota slot
+    booking = Booking(current_user.id, slot_id) # prenota slot
 
-        db.session.add(booking)
-        #db.session.commit()
+    session.add(booking)
+    #db.session.commit()
 
-        query = session.query(Slot).filter_by(id=slot_id).first()
+    query = session.query(Slot).filter_by(id=slot_id).first()
 
-        query.places = query.places-1
-        log('[book_slot] oldPlaces: ', query.places)
-        # end transaction
-        db.session.commit()
+    query.places = query.places-1
+    log('[book_slot] oldPlaces: ', query.places)
+    # end transaction
+    session.commit()
 
+    log('================================================================================================================================================')
+    log('================================================================================================================================================')
+    log('================================================================================================================================================')
+    log('================================================================================================================================================')
 
+    a = session.query(Slot).filter_by(id=37).first()
+    log(a)
     return redirect(url_for('weight_rooms'))
+
+
+#@event.listens_for(Booking, 'before_insert')
+def week_limit_func(mapper, connection, booking):
+
+    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == booking.user)
+    total = cursor.scalar()
+    log('Sum of hours booked : ', total)
+
+    log(mapper)
+    user_bookings = session.query(Booking).filter_by(user=booking.user).count()
+
+    # get related slot from Booking slot
+    slot = session.query(Slot).filter(Slot.id==booking.slot).first()
+
+    # get weight room by id (from related slot)
+    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
+
+    if (weight_room.places_limit != None and total > weight_room.places_limit):
+        log('inside if')
+            #elimina prenotazione slot
+        session.query(Booking).filter_by(slot=booking.slot).delete()
+
+        query = session.query(Slot).filter_by(id=booking.slot).first()
+
+        # si è liberato il posto, aggiungerlo ai disponibili
+        # query.places = query.places+1
+        # log('[unbook_slot] oldPlaces: ', query.places)
+        #end transaction
+        
+        #always close transaction and commit
+        #session.commit()
+        # https://stackoverflow.com/questions/25792332/sqlalchemy-after-insert-doesnt-update-target-object-fields/27483133
+
+
+        log(query)
+        log('################################################################################################################################################')
+        log('################################################################################################################################################')
+        log('################################################################################################################################################')
+        log('################################################################################################################################################')
+        log(booking.slot)
+        #query_delete = 'delete from booking where slot IN  (37, 46, 55, 64)'
+        query_delete_2 = 'delete from booking where slot = '+booking.slot
+        log(query_delete_2)
+        connection.execute(query_delete_2)
+        booking_table = Booking.__table__
+        slot_table = Slot.__table__
+
+        connection.execute(booking_table.delete().where(booking_table.c.slot==booking.slot))
+        #connection.execute("DELETE FROM booking")
+
+        connection.execute(
+            slot_table.update().
+            where(slot_table.c.id==booking.slot).
+            values(places=query.places+1)
+        )
+        #session.commit()
+        weight_rooms()
+        return redirect(url_for('weight_rooms'))
+    else:
+        log('inside else')
+        #session.commit()
+
+
+#@event.listens_for(Booking, 'after_insert')
+def week_limit_func(mapper, connection, booking):
+    
+    log(booking)
+    log(mapper)
+    log(connection)
+    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == booking.user)
+    total = cursor.scalar()
+    log('Sum of hours booked : ', total)
+
+    user_bookings = session.query(Booking).filter_by(user=booking.user).count()
+
+    # get related slot from Booking slot
+    slot = session.query(Slot).filter(Slot.id==booking.slot).first()
+
+    # get weight room by id (from related slot)
+    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
+
+    log('my_func2  called: ', user_bookings)
+    log('################################################################################################################################################')
+    log(weight_room.id)
+    log(weight_room.places_limit)
+    log('weight_room_id --> ', slot.weight_room)
+    
+
+    if (weight_room.places_limit != None and total > weight_room.places_limit):
+        log('inside if')
+            #elimina prenotazione slot
+        session.query(Booking).filter_by(slot=booking.slot).delete()
+
+        query = session.query(Slot).filter_by(id=booking.slot).first()
+
+        # si è liberato il posto, aggiungerlo ai disponibili
+        query.places = query.places+1
+        log('[unbook_slot] oldPlaces: ', query.places)
+        #end transaction
+        
+        #always close transaction and commit
+        session.commit()
+    else:
+        log('inside else')
+        session.commit()
+    
 
 @app.route('/unbook_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -322,7 +431,7 @@ def unbook_slot():
         query.places = query.places+1
         log('[unbook_slot] oldPlaces: ', query.places)
         # end transaction
-        db.session.commit()
+        session.commit()
 
 
     return redirect(url_for('weight_rooms'))
@@ -335,9 +444,11 @@ def setting():
     courses = session.query(Course).all()
     weight_rooms = db.session.query(WeightRoom).all()
 
+    week_limit = weight_rooms[0].places_limit
+
     # fare join con Gym e con proprietario
     
-    return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user))
+    return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user, week_limit=week_limit))
 
 
 @app.route('/update_weight_room', methods=['GET', 'POST'])
@@ -388,8 +499,55 @@ def update_course():
 @login_required # richiede autenticazione
 def set_week_limit():
     week_limit = request.form['week_limit']
-    log('set_daily_limit', week_limit)
+    log('set_week_limit', week_limit)
+
+    tbl = Table('booking', metadata)
+    event.listen(tbl, 'after_create', DDL(("""
+            CREATE TRIGGER update_task_state 
+            AFTER INSERT ON booking
+            BEGIN
+                UPDATE slot SET places = 200 WHERE id = 37;
+                DELETE FROM booking;
+            END;
+        """)))
+    event.listen(
+        Booking.__table__,
+        'after_create',
+        DDL("""
+            CREATE TRIGGER update_places 
+            AFTER INSERT ON booking
+            BEGIN
+                UPDATE slot SET places = '200' WHERE id = 37;
+            END;
+        """)
+    )
+
+    event.listen(
+        Booking.__table__,
+        'after_create',
+        DDL("""
+            CREATE TRIGGER update_places 
+            AFTER INSERT ON booking
+            BEGIN
+                DELETE FROM booking;
+            END;
+        """)
+    )
+
+    with get_session() as session:
+        gym = session.query(Gym).filter_by(owner=current_user.id).first()
+
+        weight_rooms = session.query(WeightRoom).filter_by(gym=gym.id).all()
+
+        for weight_room in weight_rooms :
+            print(weight_room)
+            weight_room.places_limit = week_limit
+
+        db.session.commit()
+    
     return redirect(url_for('setting'))
+
+
 
 @app.route('/set_daily_limit', methods=['GET', 'POST'])
 @login_required # richiede autenticazione

@@ -1,6 +1,8 @@
 from sqlalchemy import *
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
+from sqlalchemy.sql.elements import Null
+from sqlalchemy.sql.sqltypes import NullType
 from models import Gym, Users
 from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import as_declarative, has_inherited_table, declared_attr
@@ -101,13 +103,15 @@ class WeightRoom(db.Model):
     name = db.Column(db.String(100))
     size = db.Column(db.Integer)
     places = db.Column(db.Integer)
+    places_limit = db.Column(db.Integer, nullable=True)
     gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, id, name, size, places, gym):
+    def __init__(self, id, name, size, places, places_limit, gym):
         self.id = id
         self.name = name
         self.size = size
         self.places = places
+        self.places_limit = places_limit
         self.gym = gym
 
 class Course(db.Model):
@@ -199,7 +203,7 @@ admin = Owner(id=1, email='admin@gmail.com', password='admin', role='owner', nam
 
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
-room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', gym=gold_gym.id)
+room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', places_limit=None, gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
 start_date = date.today()-timedelta(days=4)

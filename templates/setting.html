@@ -69,7 +69,7 @@
             <form action="/set_week_limit" method="POST">
                 <div class="form-group">
                     <label >Limite accessi settimanale</label>
-                    <input type="number" class="form-control" name="week_limit" placeholder="4 ..." max="168">
+                    <input type="number" required class="form-control" name="week_limit" placeholder="4 ..." value="{{week_limit}}" max="168">
                     <small  class="form-text text-muted">Imposta limite di accessi alla sala pesi settimanali per utente</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Imposta limite</button>
@@ -77,7 +77,7 @@
             <form action="/set_daily_limit" method="POST">
                 <div class="form-group">
                     <label >Limite orario</label>
-                    <input type="number" class="form-control" name="daily_limit" placeholder="3 ..." max="24">
+                    <input type="number" required class="form-control" name="daily_limit" placeholder="3 ..." max="24">
                     <small class="form-text text-muted">Imposta limite di ore giornaliere alla sala pesi per utente</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Imposta limite</button>
