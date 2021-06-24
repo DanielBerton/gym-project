@@ -1,6 +1,9 @@
-$('.datepicker').datepicker();
 
-$('.datepicker').datepicker({
-    format: 'mm/dd/yyyy',
-    startDate: '-3d'
-});
+
+function myFunction(id){
+
+      var button = document.getElementById("btn");
+      button.value=id
+      console.log(button.value)
+
+  };

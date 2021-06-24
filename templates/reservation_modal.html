@@ -24,7 +24,8 @@
         </form>
         {% else %}
         <p><b>Prenota Slot</b></p>
-        <p>{{ slot.day }} </p>
+        <p>Giorno: {{ slot.day }} </p>
+        <p>ID: {{ slot.id }} </p>
         <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
         Prenotazione per l'utente: {{ user.email }}
         <p>Posti disponibili: {{ slot.places }}</p>
