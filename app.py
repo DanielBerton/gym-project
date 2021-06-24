@@ -166,7 +166,14 @@ def weight_rooms():
     # get all slot booked for current user
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date ))
+
+    # calculate total hours booked from user
+    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
+    total = cursor.scalar()
+
+    weight_room = session.query(WeightRoom).first()
+
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total=total, limit=weight_room.places_limit ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -277,11 +284,23 @@ def select_slot():
 @app.route('/book_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def book_slot():
-    slot_id =request.args.get("slot_id")
     log('############################################### book_slot ###############################################')
+    slot_id =request.args.get("slot_id")
 
-    log('book_slot id: ', slot_id)
-    log('book_slot user id: ', current_user.id)
+    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
+    total = cursor.scalar()
+    log('Sum of hours booked : ', total)
+
+        # get related slot from Booking slot
+    slot = session.query(Slot).filter(Slot.id==slot_id).first()
+
+    # get weight room by id (from related slot)
+    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
+
+    # if (weight_room.places_limit != None and total > weight_room.places_limit):
+    #     log('limit exceeded')
+        
+
     # book slot for this user
     # start transaction
     booking = Booking(current_user.id, slot_id) # prenota slot
