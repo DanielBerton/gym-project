@@ -51,7 +51,7 @@ class Owner(Users):
     __table_args__ = (
         db.CheckConstraint('(name NOT NULL) and (surname NOT NULL) or (company_name NOT NULL)', name='name_and_surname_or_company_name'),
     )
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
     name = db.Column(db.String(100), nullable=True)
     surname = db.Column(db.String(100), nullable=True)
     company_name = db.Column(db.String(100), nullable=True)
@@ -68,14 +68,14 @@ class Owner(Users):
 
 class Member(Users, db.Model):
     __tablename__ = 'member'
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
 
     def __repr__(self):
         return "<Member(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
 
 class Instructor(Users, db.Model):
     __tablename__ = 'instructor'
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
     specialization = db.Column(db.String(100))
 
     def __init__(self, id, email, password, role, specialization):
@@ -94,7 +94,7 @@ class Gym(db.Model):
     city = db.Column(db.String(100))
     zipCode = db.Column(db.String(100))
     country = db.Column(db.String(100))
-    owner = Column(Integer, ForeignKey('owner.id'))
+    owner = db.Column(Integer, ForeignKey('owner.id'))
 
     def __init__(self, id, name, address, city, zipCode, country, owner):
         self.id = id
@@ -118,7 +118,7 @@ class WeightRoom(db.Model):
     places = db.Column(db.Integer)
     week_limit = db.Column(db.Integer, nullable=True)
     daily_limit = db.Column(db.Integer, nullable=True)
-    gym = Column(Integer, ForeignKey('gym.id'))
+    gym = db.Column(Integer, ForeignKey('gym.id'))
 
     def __init__(self, id, name, size, places, week_limit, daily_limit, gym):
         self.id = id
@@ -140,15 +140,15 @@ class Slot(db.Model):
     hourFrom = db.Column(db.String(100))
     hourTo = db.Column(db.String(100))
     places = db.Column(db.Integer)
-    weight_room  = Column(Integer, ForeignKey('weight_room.id'))
+    weight_room = db.Column(Integer, ForeignKey('weight_room.id'))
 
     def __init__(self, day, date, hourFrom, hourTo, places, weight_room ):
-            self.day = day
-            self.date = date
-            self.hourFrom = hourFrom
-            self.hourTo = hourTo
-            self.places = places
-            self.weight_room  = weight_room
+        self.day = day
+        self.date = date
+        self.hourFrom = hourFrom
+        self.hourTo = hourTo
+        self.places = places
+        self.weight_room  = weight_room
 
     def __repr__(self):
         return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.weight_room )
@@ -157,23 +157,23 @@ class Slot(db.Model):
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
-    user = Column(Integer, ForeignKey('users.id'))
-    slot = Column(Integer, ForeignKey('slot.id'))
+    user = db.Column(Integer, ForeignKey('users.id'))
+    slot = db.Column(Integer, ForeignKey('slot.id'))
 
     def __init__(self, user, slot):
-            self.user = user
-            self.slot = slot
+        self.user = user
+        self.slot = slot
     
     def __repr__(self):
         return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
-        
+
 ## Start course ##
 class Course(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
     name = db.Column(db.String(100))
     places = db.Column(db.Integer)
-    gym = Column(Integer, ForeignKey('gym.id'))
-    instructor = Column(Integer, ForeignKey('instructor.id'))
+    gym = db.Column(Integer, ForeignKey('gym.id'))
+    instructor = db.Column(Integer, ForeignKey('instructor.id'))
 
     def __init__(self, id, name, places, gym, instructor):
         self.id = id
@@ -189,7 +189,7 @@ class CourseScheduling(db.Model):
     start_hour = db.Column(db.String(50))
     end_hour = db.Column(db.String(50))
     places = db.Column(db.Integer)
-    course = Column(Integer, ForeignKey('course.id'))
+    course = db.Column(Integer, ForeignKey('course.id'))
 
     def __init__(self, day_of_week, start_hour, end_hour, places, course):
             self.day_of_week = day_of_week
@@ -205,8 +205,8 @@ class CourseScheduling(db.Model):
 class BookingCourse(db.Model):
     __tablename__ = 'booking_course'
     id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
-    member = Column(Integer, ForeignKey('member.id'))
-    course_scheduling = Column(Integer, ForeignKey('course_scheduling.id'))
+    member = db.Column(Integer, ForeignKey('member.id'))
+    course_scheduling = db.Column(Integer, ForeignKey('course_scheduling.id'))
 
     def __init__(self, member, course_scheduling):
             self.member = member
