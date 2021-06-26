@@ -57,7 +57,9 @@
                                 <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
                                     class="{{ 'btn-danger' if slot.places < 1 else 'btn-warning' }} btn">
                                     Rimuovi
-                                    <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                    {% if week_limit != 99999999 %}
+                                        <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                    {% endif %}
                                 </button>
                             </form>
 
@@ -98,11 +100,12 @@
                                                         <p>Limite giornaliero superato</p>
                                                     {% endif %}
                                                 {% endif %}
-
                                                 
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <form>
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </form>
                                                 <form action="/select_slot" method="GET">
                                                     {% if total_week < week_limit and slot.daily_reservations < daily_limit %}
                                                     <button id="btn"  type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
@@ -122,15 +125,17 @@
                                     <button type="button" data-toggle="modal" data-target="#myModal"
                                         class="{{ 'btn-danger' if slot.places < 1 else 'btn-success' }} btn" onclick='myFunction({{slot.id}})'>
                                         Prenota
-                                        <span class="badge badge-pill badge-warning">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                        {% if week_limit != 99999999 %}
+                                            <span class="badge badge-pill badge-warning">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                        {% endif %}
                                     </button>
                                 </form>
                                 {% else %}  
                                 <form>
                                     <button type="button" data-toggle="popover"
-                                        class="btn-danger btn" onclick='myFunction({{slot.id}})' data-content="And here's some amazing content. It's very engaging. Right?">
+                                        class="btn-danger btn" onclick='myFunction({{slot.id}})'>
                                         <strike>Prenota</strike>
-                                        <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                            <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
                                     </button>
                                 </form>
                                 {% endif %}
