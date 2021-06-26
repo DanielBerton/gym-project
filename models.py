@@ -29,7 +29,7 @@ class Users(db.Model, UserMixin):
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
-    role = db.Column(db.String(50))
+    role = db.Column(db.String(50), nullable=False)
     #__mapper_args__ = {'polymorphic_on': email }
 
     def __init__(self, id, email, password, role):
@@ -106,15 +106,17 @@ class WeightRoom(db.Model):
     name = db.Column(db.String(100))
     size = db.Column(db.Integer)
     places = db.Column(db.Integer)
-    places_limit = db.Column(db.Integer, nullable=True)
+    week_limit = db.Column(db.Integer, nullable=True)
+    daily_limit = db.Column(db.Integer, nullable=True)
     gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, id, name, size, places, places_limit, gym):
+    def __init__(self, id, name, size, places, week_limit, daily_limit, gym):
         self.id = id
         self.name = name
         self.size = size
         self.places = places
-        self.places_limit = places_limit
+        self.week_limit = week_limit
+        self.daily_limit = daily_limit
         self.gym = gym
 
 

@@ -103,15 +103,17 @@ class WeightRoom(db.Model):
     name = db.Column(db.String(100))
     size = db.Column(db.Integer)
     places = db.Column(db.Integer)
-    places_limit = db.Column(db.Integer, nullable=True)
+    week_limit = db.Column(db.Integer, nullable=True)
+    daily_limit = db.Column(db.Integer, nullable=True)
     gym = Column(Integer, ForeignKey('gym.id'))
 
-    def __init__(self, id, name, size, places, places_limit, gym):
+    def __init__(self, id, name, size, places, week_limit, daily_limit, gym):
         self.id = id
         self.name = name
         self.size = size
         self.places = places
-        self.places_limit = places_limit
+        self.week_limit = week_limit
+        self.daily_limit = daily_limit
         self.gym = gym
 
 class Course(db.Model):
@@ -203,11 +205,11 @@ admin = Owner(id=1, email='admin@gmail.com', password='admin', role='owner', nam
 
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
-room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', places_limit=None, gym=gold_gym.id)
+room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', week_limit=None, daily_limit=None, gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
 start_date = date.today()-timedelta(days=4)
-end_date = date(2021, 12, 31)
+end_date = date(2021, 7, 31)
 delta = timedelta(days=1)
 while start_date <= end_date:
     db.session.add_all([

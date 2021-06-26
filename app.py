@@ -114,19 +114,36 @@ def next():
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
 
-        # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
-    total = cursor.scalar()
+    today = datetime.today()
+    end_weed = today+timedelta(days=7) #calculate a week today + 7
+    # calculate total hours booked from user
+    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    total_week = cursor.scalar()
+    log(datetime.today().strftime('%Y-%m-%d'))
+    log(total_week)
+
+    for slot in slots:
+        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
+        total_daily = cursor.scalar()
+        # add temporary calculated field for current user
+        slot.daily_reservations = total_daily
+
     
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total=total, limit=get_week_limit()))
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
 def get_week_limit():
     weight_room = session.query(WeightRoom).first()
-    limit = weight_room.places_limit
+    limit = weight_room.week_limit
     if (limit== None):
         limit = 99999999
     return limit
 
+def get_daily_limit():
+    weight_room = session.query(WeightRoom).first()
+    limit = weight_room.daily_limit
+    if (limit== None):
+        limit = 99999999
+    return limit
 
 @app.route('/previous', methods=['GET', 'POST'])
 def previous():
@@ -157,11 +174,21 @@ def previous():
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
 
-        # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
-    total = cursor.scalar()
+    today = datetime.today()
+    end_weed = today+timedelta(days=7) #calculate a week today + 7
+    # calculate total hours booked from user
+    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    total_week = cursor.scalar()
+    log(datetime.today().strftime('%Y-%m-%d'))
+    log(total_week)
 
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total=total, limit=get_week_limit()  ))
+    for slot in slots:
+        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
+        total_daily = cursor.scalar()
+        # add temporary calculated field for current user
+        slot.daily_reservations = total_daily
+
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
 @app.route('/weight_rooms', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -184,11 +211,28 @@ def weight_rooms():
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
     log('[weight_rooms] booking ids: ', bookings)
 
+    today = datetime.today()
+    end_weed = today+timedelta(days=7)
     # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
-    total = cursor.scalar()
+    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    total_week = cursor.scalar()
+    log(datetime.today().strftime('%Y-%m-%d'))
+    log(total_week)
 
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total=total, limit=get_week_limit()  ))
+    for slot in slots:
+
+        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
+
+        total_daily = cursor.scalar()
+        log('================================================================================================================================================')
+        log('================================================================================================================================================')
+        log('================================================================================================================================================')
+        log('================================================================================================================================================')
+        log('----------------------------------------------------------------', total_daily)
+        # add temporary calculated field for current user
+        slot.daily_reservations = total_daily
+
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()  ))
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -319,7 +363,7 @@ def book_slot():
     # get weight room by id (from related slot)
     weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
 
-    # if (weight_room.places_limit != None and total > weight_room.places_limit):
+    # if (weight_room.week_limit != None and total > weight_room.week_limit):
     #     log('limit exceeded')
         
 
@@ -357,7 +401,7 @@ def week_limit_func(mapper, connection, booking):
     # get weight room by id (from related slot)
     weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
 
-    if (weight_room.places_limit != None and total > weight_room.places_limit):
+    if (weight_room.week_limit != None and total > weight_room.week_limit):
         log('inside if')
             #elimina prenotazione slot
         session.query(Booking).filter_by(slot=booking.slot).delete()
@@ -396,7 +440,6 @@ def week_limit_func(mapper, connection, booking):
             values(places=query.places+1)
         )
         #session.commit()
-        weight_rooms()
         return redirect(url_for('weight_rooms'))
     else:
         log('inside else')
@@ -424,11 +467,11 @@ def week_limit_func(mapper, connection, booking):
     log('my_func2  called: ', user_bookings)
     log('################################################################################################################################################')
     log(weight_room.id)
-    log(weight_room.places_limit)
+    log(weight_room.week_limit)
     log('weight_room_id --> ', slot.weight_room)
     
 
-    if (weight_room.places_limit != None and total > weight_room.places_limit):
+    if (weight_room.week_limit != None and total > weight_room.week_limit):
         log('inside if')
             #elimina prenotazione slot
         session.query(Booking).filter_by(slot=booking.slot).delete()
@@ -479,11 +522,12 @@ def setting():
     courses = session.query(Course).all()
     weight_rooms = db.session.query(WeightRoom).all()
 
-    week_limit = weight_rooms[0].places_limit
-
+    week_limit = weight_rooms[0].week_limit
+    daily_limit = weight_rooms[0].daily_limit
+    log(weight_rooms)
     # fare join con Gym e con proprietario
     
-    return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user, week_limit=week_limit))
+    return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user, week_limit=week_limit, daily_limit=daily_limit))
 
 
 @app.route('/update_weight_room', methods=['GET', 'POST'])
@@ -576,9 +620,9 @@ def set_week_limit():
 
         for weight_room in weight_rooms :
             print(weight_room)
-            weight_room.places_limit = week_limit
+            weight_room.week_limit = week_limit
 
-        db.session.commit()
+        session.commit()
     
     return redirect(url_for('setting'))
 
@@ -590,6 +634,17 @@ def set_daily_limit():
     
     daily_limit = request.form['daily_limit']
     log('set_daily_limit', daily_limit)
+
+    with get_session() as session:
+        gym = session.query(Gym).filter_by(owner=current_user.id).first()
+
+        weight_rooms = session.query(WeightRoom).filter_by(gym=gym.id).all()
+
+        for weight_room in weight_rooms :
+            print(weight_room)
+            weight_room.daily_limit = daily_limit
+
+        session.commit()
     return redirect(url_for('setting'))
 
 @app.route('/logout', methods=['GET', 'POST'])
