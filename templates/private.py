@@ -38,7 +38,7 @@ def private ():
         log('is_authenticated')
         user = current_user
     log('[private] executed')
-    users = Users.query.all()
+    users = User.query.all()
     log('[private] users ', users)
 
     if (user.role == 'admin'):

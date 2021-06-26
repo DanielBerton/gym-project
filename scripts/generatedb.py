@@ -29,11 +29,11 @@ session.add_all([User(email='alice@gmail.com', password='alice'),
                  User(email='daniele.berton2@gmail.com', password='flask')])
 
 session.commit()
-# ins = "INSERT INTO Users VALUES (?,?,?)"
+# ins = "INSERT INTO User VALUES (?,?,?)"
 # conn.execute(ins, ['1', 'alice@gmail.com', 'alice'])
 # conn.execute(ins, ['2', 'dean@gmail.com', 'dean'])
 
 
-user_list = conn.execute("SELECT * FROM Users")
+user_list = conn.execute("SELECT * FROM User")
 for u in user_list:
     print ('User ----------> ',u)

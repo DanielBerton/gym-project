@@ -41,7 +41,7 @@ db = SQLAlchemy(app, session_options={"autoflush": True})
 
 def get_user_by_email(email):
     log('[get_user_by_email] executed', '')
-    user = Users.query.filter_by (email=email).first()
+    user = User.query.filter_by (email=email).first()
     log('[get_user_by_email] user: ', user)
     return user
 
@@ -49,7 +49,7 @@ def get_user_by_email(email):
 def load_user(user_id):
 
     log('[load_user] user_id: ', user_id)
-    user = Users.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(id=user_id).first()
     log('[load_user] Logged user: ',user)
     return user
 
@@ -71,7 +71,7 @@ def private ():
         log('is_authenticated')
         user = current_user
     log('[private] executed')
-    users = Users.query.all()
+    users = User.query.all()
     log('[private] users ', users)
 
     if (user.role == 'owner'):
@@ -333,7 +333,7 @@ def select_slot():
 
     if (user.role == 'owner'):
         # prendiamo tuttgli gli utenti che hanno prenotato questo slot
-        booking_list = session.query(Booking, Users.email).filter_by(slot=slot.id, user=Users.id).all()
+        booking_list = session.query(Booking, User.email).filter_by(slot=slot.id, user=User.id).all()
         resp = make_response(render_template("booking_list.html", slot=slot,user=user, booking_list=booking_list))
     else:
         resp = make_response(render_template("reservation_modal.html", slot=slot, user=user, is_booked=is_booked))
@@ -662,7 +662,7 @@ def login ():
 
         email = request.form['user']
 
-        user = Users.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first()
 
         log('[login] user: ',  user)
         if (user and user.password is not None):
@@ -678,11 +678,11 @@ def login ():
 
 @app.route('/test')
 def test():
-    u = request.args.get('Users')
+    u = request.args.get('User')
     #usafe
         #return "Welcome {}".format(u)
     #safe non viene interpretato come html
-    return render_template('profile.html', Users=u)
+    return render_template('profile.html', User=u)
 
 
 if __name__ == '__main__':

@@ -23,8 +23,8 @@ login_manager.init_app(app)
 
 db = SQLAlchemy(app)
 
-class Users(db.Model, UserMixin):
-    __tablename__ = 'users'
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     __table_args__ = (
         db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
     )
@@ -45,13 +45,13 @@ class Users(db.Model, UserMixin):
         return "<User(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
 
 
-class Owner(Users):
+class Owner(User):
     __tablename__ = 'owner'
-    __mapper_args__ = {'polymorphic_identity': 'users'}
+    __mapper_args__ = {'polymorphic_identity': 'user'}
     __table_args__ = (
         db.CheckConstraint('(name NOT NULL) and (surname NOT NULL) or (company_name NOT NULL)', name='name_and_surname_or_company_name'),
     )
-    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('user.id'), primary_key=True)
     name = db.Column(db.String(100), nullable=True)
     surname = db.Column(db.String(100), nullable=True)
     company_name = db.Column(db.String(100), nullable=True)
@@ -66,16 +66,16 @@ class Owner(Users):
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
 
-class Member(Users, db.Model):
+class Member(User, db.Model):
     __tablename__ = 'member'
-    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('user.id'), primary_key=True)
 
     def __repr__(self):
         return "<Member(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
 
-class Instructor(Users, db.Model):
+class Instructor(User, db.Model):
     __tablename__ = 'instructor'
-    id = db.Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = db.Column(Integer, ForeignKey('user.id'), primary_key=True)
     specialization = db.Column(db.String(100))
 
     def __init__(self, id, email, password, role, specialization):
@@ -157,7 +157,7 @@ class Slot(db.Model):
 class Booking(db.Model):
     __tablename__ = 'booking'
     id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
-    user = db.Column(Integer, ForeignKey('users.id'))
+    user = db.Column(Integer, ForeignKey('user.id'))
     slot = db.Column(Integer, ForeignKey('slot.id'))
 
     def __init__(self, user, slot):
