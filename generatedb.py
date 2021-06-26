@@ -11,8 +11,9 @@ from datetime import date, timedelta
 from models import *
 
 app = Flask (__name__)
-app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
 metadata = MetaData()
 
@@ -26,7 +27,8 @@ class Users(db.Model, UserMixin):
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
-    role = db.Column(db.String(50))
+    role = db.Column(db.String(50), nullable=False)
+    #CHeck su role può essere solo owner, member eecc
     #__mapper_args__ = {'polymorphic_on': email }
 
     def __init__(self, id, email, password, role):
@@ -42,18 +44,19 @@ class Users(db.Model, UserMixin):
 class Owner(Users):
     __tablename__ = 'owner'
     __mapper_args__ = {'polymorphic_identity': 'users'}
+    __table_args__ = (
+        db.CheckConstraint('(name NOT NULL) and (surname NOT NULL) or (company_name NOT NULL)', name='name_and_surname_or_company_name'),
+    )
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    name = db.Column(db.String(100))
-    surname = db.Column(db.String(100))
-    company_name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=True)
+    surname = db.Column(db.String(100), nullable=True)
+    company_name = db.Column(db.String(100), nullable=True)
 
     def __init__(self, id, email, password, role, name, surname, company_name):
         super().__init__(id, email, password, role)
-        print('inside super: '+ name)
         self.name = name
         self.surname = surname
         self.company_name = company_name
-
 
     def __repr__(self):
         return "<Owner(id='%s', email='%s', password='%s', name='%s', role='%s')>" % (self.id, self.email, self.password, self.name, self.role)
@@ -99,6 +102,11 @@ class Gym(db.Model):
 
 class WeightRoom(db.Model):
     __tablename__ = 'weight_room'
+    __table_args__ = (
+        db.UniqueConstraint('name', name='uniq_weight_room_name'),
+        db.CheckConstraint('(size > 0)', name='weight_room_minimum_size'),
+        db.CheckConstraint('(places <= size/2)', name='weight_room__size_places_ratio'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     name = db.Column(db.String(100))
     size = db.Column(db.Integer)
@@ -116,6 +124,45 @@ class WeightRoom(db.Model):
         self.daily_limit = daily_limit
         self.gym = gym
 
+    def __repr__(self):
+        return "<WeightRoom(id='%s', name='%s', size='%s',  places='%s', gym='%s'gym)>" % (self.id, self.name, self.size,  self.places, self.gym)
+
+class Slot(db.Model):
+    __tablename__ = 'slot'
+    id = db.Column('id', db.Integer, primary_key = True)
+    day = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    hourFrom = db.Column(db.String(100))
+    hourTo = db.Column(db.String(100))
+    places = db.Column(db.Integer)
+    weight_room  = Column(Integer, ForeignKey('weight_room.id'))
+
+    def __init__(self, day, date, hourFrom, hourTo, places, weight_room ):
+            self.day = day
+            self.date = date
+            self.hourFrom = hourFrom
+            self.hourTo = hourTo
+            self.places = places
+            self.weight_room  = weight_room
+
+    def __repr__(self):
+        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.weight_room )
+
+# Gym slot booking
+class Booking(db.Model):
+    __tablename__ = 'booking'
+    id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
+    user = Column(Integer, ForeignKey('users.id'))
+    slot = Column(Integer, ForeignKey('slot.id'))
+
+    def __init__(self, user, slot):
+            self.user = user
+            self.slot = slot
+    
+    def __repr__(self):
+        return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
+
+## Start course ##
 class Course(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
     name = db.Column(db.String(100))
@@ -149,7 +196,7 @@ class CourseScheduling(db.Model):
     def __repr__(self):
         return "<CourseScheduling(id='%s', day_of_week='%s', start_hour='%s',  end_hour='%s', places='%d', course='%s')>" % (self.id, self.day_of_week, self.start_hour,  self.end_hour, self.places, self.course)
 
-#course_schedulin
+# booking_course
 class BookingCourse(db.Model):
     __tablename__ = 'booking_course'
     id = db.Column('id', db.Integer, primary_key = True)
@@ -163,49 +210,12 @@ class BookingCourse(db.Model):
     def __repr__(self):
         return "<BookingCourse(id='%s', member='%s', course_scheduling='%s')>" % (self.id, self.member, self.course_scheduling)
 
-
-# Gym slot booking
-class Booking(db.Model):
-    __tablename__ = 'booking'
-    id = db.Column('id', db.Integer, primary_key = True)
-    user = Column(Integer, ForeignKey('users.id'))
-    slot = Column(Integer, ForeignKey('slot.id'))
-
-    def __init__(self, user, slot):
-            self.user = user
-            self.slot = slot
-    
-    def __repr__(self):
-        return "<Booking(id='%s', user='%s', slot='%s')>" % (self.id, self.user, self.slot)
-
-
-class Slot(db.Model):
-    __tablename__ = 'slot'
-    id = db.Column('id', db.Integer, primary_key = True)
-    day = db.Column(db.Integer)
-    date = db.Column(db.Date)
-    hourFrom = db.Column(db.String(100))
-    hourTo = db.Column(db.String(100))
-    places = db.Column(db.Integer)
-    weight_room  = Column(Integer, ForeignKey('weight_room.id'))
-
-    def __init__(self, day, date, hourFrom, hourTo, places, weight_room ):
-            self.day = day
-            self.date = date
-            self.hourFrom = hourFrom
-            self.hourTo = hourTo
-            self.places = places
-            self.weight_room  = weight_room
-
-    def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.weight_room )
-
-        
 admin = Owner(id=1, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name='')
-
+admin2 = Owner(id=20, email='admin2@gmail.com', password='admin2', role='owner', name='', surname='', company_name=None)
+db.session.add_all([admin2])
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
-room_1 = WeightRoom(id=1, name='Room 1', size='85', places='35', week_limit=None, daily_limit=None, gym=gold_gym.id)
+room_1 = WeightRoom(id=1, name='Room 1', size=85, places=35, week_limit=None, daily_limit=None, gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
 start_date = date.today()-timedelta(days=4)
