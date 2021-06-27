@@ -564,6 +564,22 @@ def login ():
     else:
         return redirect(url_for('home'))
 
+@app.route('/bookink_list', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def bookink_list():
+
+    booking_list = session.query(Booking, User.email, Slot.date, Slot.hourFrom, Slot.hourTo, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
+
+    log(booking_list)
+    """
+        SELECT booking.id AS booking_id, booking.user AS booking_user, booking.slot AS booking_slot, user.email AS user_email, slot.date AS slot_date, slot."hourFrom" AS "slot_hourFrom", slot."hourTo" AS "slot_hourTo", slot.id AS slot_id 
+        FROM booking, user, slot 
+        WHERE booking.user = user.id AND booking.slot = slot.id 
+        ORDER BY slot.date
+    """
+    return make_response(render_template("total_booking_list.html", user=current_user, booking_list=booking_list))
+
+
 @app.route('/test')
 def test():
     u = request.args.get('User')

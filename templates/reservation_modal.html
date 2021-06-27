@@ -7,7 +7,10 @@
         <form action="{{ url_for('weight_rooms') }}">
     
             <button type="submit" class="btn btn-outline-primary btn-sm">
-                < Torna alla lista</button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
+                  </svg>
+                Torna alla lista</button>
         </form>
     </div>
     <div>
@@ -20,7 +23,7 @@
         Prenotazione per l'utente: {{ user.email }}
         <form action="/unbook_slot" method="GET">
 
-            <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">Disdici prenotazione</button>
+            <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" class="btn-warning btn">Disdici prenotazione</button>
         </form>
         {% else %}
         <p><b>Prenota Slot</b></p>

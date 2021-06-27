@@ -1,14 +1,17 @@
 {% extends "base.html" %}
  {% block pagebody %}
     {% if user %}
-    Welcome to the web app, {{ user.email }}!
-    You are an Admin
-    {% else %}
-    Welcome to the web app, anonymous! <br/> The following users are registered:
-    <ul>
-    {% for u in users %}
-    <li> {{ u }} </li> {% endfor %}
-    </ul>
+
+        <div class="jumbotron">
+            <h5 class="display-4">Benvenuto, {{ user.email }}!</h5>
+            <p class="lead">Con questa applicazione potrai gestire la tua palestra.</p>
+            <hr class="my-4">
+            <p>Potrai visualizzare tutte le prenotazioni e configurare le tue regole in base alle normative vigenti.</p>
+            <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('weight_rooms') }}" role="button">Verifica le prenotazioni</a>
+            </p>
+        </div>
+
     {% endif %} </body>
 
 {% endblock %}
