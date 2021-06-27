@@ -230,9 +230,7 @@ def courses():
     start_date = date(2021, 7, 1)
     end_date = date(2021, 7, 7)
 
-    # start_date = date.today()
-    # end_date = date.today()+timedelta(days=4)
-
+    
     delta = timedelta(days=1)
 
     while start_date <= end_date:
@@ -242,7 +240,13 @@ def courses():
 
     booked_course = [r.course_scheduling for r in session.query(BookingCourse.course_scheduling).filter_by(member=current_user.id)]
 
-    log(booked_course)
+    # if owner get all course reservation
+    if (current_user.role == 'owner'):
+        all_bookings = session.query(BookingCourse.id, CourseScheduling.id, Course.name, Member.email, CourseScheduling.day_of_week) .filter(BookingCourse.member == Member.id, BookingCourse.course_scheduling == CourseScheduling.id, CourseScheduling.course == Course.id).all()
+        log('################################################################################')
+        log(all_bookings)
+        return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course, status=status, all_bookings=all_bookings))
+
     return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course, status=status))
 
 @app.route('/book_course', methods=['GET', 'POST'])
@@ -255,10 +259,8 @@ def book_course():
         booking = BookingCourse(current_user.id, select_course) # prenota slot
 
         session.add(booking)
-        session.commit()
+        #session.commit()
 
-        #b = db.session.query(BookingCourse).all()
-        print(booking)
         course_scheduling = session.query(CourseScheduling).filter_by(id=select_course).first()
         #query = session.query(CourseScheduling).filter_by(id=course_scheduling_id).first()
 
