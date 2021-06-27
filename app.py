@@ -514,10 +514,21 @@ def unbook_slot():
 
     return redirect(url_for('weight_rooms'))
 
+@app.route('/unauthorized', methods=['GET', 'POST'])
+@login_manager.unauthorized_handler
+def unauthorized():
+    # do stuff
+    log('######################### unauthorized ####################################')
+    log(request.path)
+    return make_response(render_template("unauthorized.html", route=request.path))
+
 @app.route('/setting', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def setting():
-    
+    log(current_user.role)
+    # bloccare se utente non è owner
+    if current_user.role != 'owner':
+         return redirect(url_for('unauthorized'))
     #courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
     courses = session.query(Course).all()
     weight_rooms = db.session.query(WeightRoom).all()
