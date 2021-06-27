@@ -32,10 +32,10 @@
     </nav>
     <div class="row">
         {% for day in days %}
-        <div class="col-sm">
-
-            {{ day.day_name }}
-            {{ day.day }} {{ day.month }}
+        <div class="col-sm" style="margin-top: 10px;">
+            <div > 
+                <b>{{ day.day_name }} {{ day.day }} {{ day.month }}</b>
+            </div>
 
             {% for slot in slots %}
                 
@@ -43,105 +43,135 @@
                 <!-- check if slot is the same day of calendar -->
                 #}
                 {% if slot.date == day.date %}
-                <!-- check if the slot is booked from current user -->
-                {% if slot.id in bookings %}
+                
+                    {# <!-- check if admin -->  #}
+                    {% if user.role == 'owner' %}
+                        <div class="card mt-10" style="width: 14rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">Slot</h5>
+                                <p class="card-text">Fascia oraira</p>
+                                <p>Posti: {{ slot.places }}</p>
+                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <form action="/select_slot" method="GET">
+                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
+                                        class="btn-success btn">
+                                        Visualizza lista
+                                    </button>
+                                </form>
 
-                    <div class="card mt-10" style="width: 14rem;">
-                        <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
-                        <div class="card-body">
-                            <h5 class="card-title">Disdici Slot</h5>
-                            <p class="card-text">Fascia oraira</p>
-                            <p>Posti: {{ slot.places }}</p>
-                            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
-                            <form action="/select_slot" method="GET">
-                                <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
-                                    class="{{ 'btn-danger' if slot.places < 1 else 'btn-warning' }} btn">
-                                    Rimuovi
-                                    {% if week_limit != 99999999 %}
-                                        <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
-                                    {% endif %}
-                                </button>
-                            </form>
-
+                            </div>
                         </div>
-                    </div>
 
-                {% else %}
-                    <div class="card mt-10" style="width: 14rem;">
-                        <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
-                        <div class="card-body">
-                            <h5 class="card-title">Prenota Slot</h5>
-                            <p class="card-text">Fascia oraira</p>
-                            <p>Posti: {{ slot.places }}</p>
-                            <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
-                            <!-- {# START MODAL #} -->
-                                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLongTitle">Prenota</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                
-                                                {% if total_week >= week_limit %}
-                                                    Limite settimanale di accessi superato : {{week_limit}}
-                                                {% else %}
-                                                    {% if slot.daily_reservations < daily_limit %}
-                                                        <p>Procedere con la prenotazione.</p>
-                                                        {% if week_limit == 99999999 %}
-                                                            <p>Non sono previste limitazioni agli accessi</p>
-                                                        {% else %}
-                                                            <p>Hai ancora a disposizione <b>{{ week_limit - total_week}}</b> prenotazione questa settimana</p>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <p>Limite giornaliero superato</p>
-                                                    {% endif %}
-                                                {% endif %}
-                                                
-                                            </div>
-                                            <div class="modal-footer">
-                                                <form>
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                </form>
-                                                <form action="/select_slot" method="GET">
-                                                    {% if total_week < week_limit and slot.daily_reservations < daily_limit %}
-                                                    <button id="btn"  type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
-                                                    class="{{ 'btn-danger' if slot.places < 1 else 'btn-success' }} btn">
-                                                    Procedi
-                                                    </button>
-                                                    {% endif %}
-                                                </form>
-                                            
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <!-- {# END MODAL #} -->
-                            {% if slot.daily_reservations < daily_limit %}
-                            <form>
-                                    <button type="button" data-toggle="modal" data-target="#myModal"
-                                        class="{{ 'btn-danger' if slot.places < 1 else 'btn-success' }} btn" onclick='myFunction({{slot.id}})'>
-                                        Prenota
+                    {% else %}
+
+
+                    <!-- check if the slot is booked from current user -->
+                    {% if slot.id in bookings %}
+    
+                        <div class="card mt-10" style="width: 14rem;">
+                            <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
+                            <div class="card-body">
+                                <h5 class="card-title">Disdici Slot</h5>
+                                <p class="card-text">Fascia oraira</p>
+                                <p>Posti: {{ slot.places }}</p>
+                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <form action="/select_slot" method="GET">
+                                    <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
+                                        class="{{ 'btn-danger' if slot.places < 1 else 'btn-warning' }} btn">
+                                        Rimuovi
                                         {% if week_limit != 99999999 %}
-                                            <span class="badge badge-pill badge-warning">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                            <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
                                         {% endif %}
                                     </button>
                                 </form>
-                                {% else %}  
-                                <form>
-                                    <button type="button" data-toggle="popover"
-                                        class="btn-danger btn" onclick='myFunction({{slot.id}})'>
-                                        <strike>Prenota</strike>
-                                            <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
-                                    </button>
-                                </form>
-                                {% endif %}
+    
+                            </div>
                         </div>
-                    </div>
-                {% endif %}
+    
+                    {% else %}
+                        <div class="card mt-10" style="width: 14rem;">
+                            <img class="card-img-top" src="static/img/gym.jpeg" alt="Gym image">
+                            <div class="card-body">
+                                <h5 class="card-title">Prenota Slot</h5>
+                                <p class="card-text">Fascia oraira</p>
+                                <p>Posti: {{ slot.places }}</p>
+                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <!-- {# START MODAL #} -->
+                                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Prenota</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    
+                                                    {% if total_week >= week_limit %}
+                                                        Limite settimanale di accessi superato : {{week_limit}}
+                                                    {% else %}
+                                                        {% if slot.daily_reservations < daily_limit %}
+                                                            <p>Procedere con la prenotazione.</p>
+                                                            {% if week_limit == 99999999 %}
+                                                                <p>Non sono previste limitazioni agli accessi</p>
+                                                            {% else %}
+                                                                <p>Hai ancora a disposizione <b>{{ week_limit - total_week}}</b> prenotazione questa settimana</p>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <p>Limite giornaliero superato</p>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    </form>
+                                                    <form action="/select_slot" method="GET">
+                                                        {% if total_week < week_limit and slot.daily_reservations < daily_limit %}
+                                                        <button id="btn"  type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
+                                                        class="{{ 'btn-danger' if slot.places < 1 else 'btn-success' }} btn">
+                                                        Procedi
+                                                        </button>
+                                                        {% endif %}
+                                                    </form>
+                                                
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <!-- {# END MODAL #} -->
+    
+                                {% if slot.daily_reservations < daily_limit %}
+    
+                                    <form>
+                                        <button type="button" data-toggle="modal" data-target="#myModal"
+                                            class="{{ 'btn-danger' if slot.places < 1 else 'btn-success' }} btn" onclick='myFunction({{slot.id}})'>
+                                            Prenota
+                                            {% if week_limit != 99999999 %}
+                                                <span class="badge badge-pill badge-warning">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    {% else %}  
+                                    <form>
+                                        <button type="button" data-toggle="popover"
+                                            class="btn-danger btn" onclick='myFunction({{slot.id}})'>
+                                            <strike>Prenota</strike>
+                                                <span class="badge badge-pill badge-light">Limite giornaliero: {{daily_limit - slot.daily_reservations}}</span>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% endif %}
+
+
+
+
+
             {% endif %}
 
             {% endfor %}

@@ -31,9 +31,9 @@
         <p>Posti disponibili: {{ slot.places }}</p>
         <form action="/book_slot" method="GET">
             {% if slot.places < 1 %} <p>Limite posti superato, non è possibile prenotare questo slot</p>
-                <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}" disabled>Conferma</button>
+                <button type="submit" class="btn-success btn" name="slot_id" id="slot_id" value="{{slot.id}}" disabled>Conferma</button>
                 {% else %}
-                <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}">Conferma</button>
+                <button type="submit" class="btn-success btn" name="slot_id" id="slot_id" value="{{slot.id}}">Conferma</button>
                 {% endif %}
         </form>
         {% endif %}
