@@ -23,6 +23,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
     __table_args__ = (
         db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
+        db.Index('user_email_index', 'email'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
@@ -130,6 +131,9 @@ class WeightRoom(db.Model):
 
 class Slot(db.Model):
     __tablename__ = 'slot'
+    __table_args__ = (
+        db.Index('slot_date_index', 'date'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     day = db.Column(db.Integer)
     date = db.Column(db.Date)
@@ -152,6 +156,9 @@ class Slot(db.Model):
 # Gym slot booking
 class Booking(db.Model):
     __tablename__ = 'booking'
+    __table_args__ = (
+        db.Index('booking_user_index', 'user'),
+    )
     id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
     user = db.Column(Integer, ForeignKey('user.id'))
     slot = db.Column(Integer, ForeignKey('slot.id'))
@@ -180,6 +187,9 @@ class Course(db.Model):
 
 class CourseScheduling(db.Model):
     __tablename__ = 'course_scheduling'
+    __table_args__ = (
+        db.Index('start_hour_index', 'start_hour'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     day_of_week = db.Column(db.String(50))
     start_hour = db.Column(db.String(50))
@@ -210,7 +220,6 @@ class BookingCourse(db.Model):
     
     def __repr__(self):
         return "<BookingCourse(id='%d', member='%s', course_scheduling='%s')>" % (self.id, self.member, self.course_scheduling)
-
 
 admin = Owner(id=1, email='admin@gmail.com', password='admin', role='owner', name='admin', surname='admin', company_name='')
 admin2 = Owner(id=20, email='admin2@gmail.com', password='admin2', role='owner', name='', surname='', company_name=None)

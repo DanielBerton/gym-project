@@ -27,6 +27,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
     __table_args__ = (
         db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
+        db.Index('user_email_index', 'email'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
@@ -134,6 +135,9 @@ class WeightRoom(db.Model):
 
 class Slot(db.Model):
     __tablename__ = 'slot'
+    __table_args__ = (
+        db.Index('slot_date_index', 'date'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     day = db.Column(db.Integer)
     date = db.Column(db.Date)
@@ -156,6 +160,9 @@ class Slot(db.Model):
 # Gym slot booking
 class Booking(db.Model):
     __tablename__ = 'booking'
+    __table_args__ = (
+        db.Index('booking_user_index', 'user'),
+    )
     id = db.Column('id', db.Integer, primary_key = True, autoincrement=True)
     user = db.Column(Integer, ForeignKey('user.id'))
     slot = db.Column(Integer, ForeignKey('slot.id'))
@@ -184,6 +191,9 @@ class Course(db.Model):
 
 class CourseScheduling(db.Model):
     __tablename__ = 'course_scheduling'
+    __table_args__ = (
+        db.Index('start_hour_index', 'start_hour'),
+    )
     id = db.Column('id', db.Integer, primary_key = True)
     day_of_week = db.Column(db.String(50))
     start_hour = db.Column(db.String(50))
