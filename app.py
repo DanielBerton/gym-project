@@ -86,17 +86,26 @@ def private ():
     log(golden)
     return resp
 
+def getAllSlots():
+    slots = session.query(Slot).all()
+
+    return slots
+
+def strToDate(date_str):
+    date_str = date_str.split("-", 2)
+    new_date = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+    return new_date
+
 @app.route('/next', methods=['GET', 'POST'])
 def next():
     log('next')
-    slots = session.query(Slot).all()
+    slots = getAllSlots()
     days = []
+    input_date = strToDate(request.args.get("start_date"))
 
-    date_str =request.args.get("start_date").split("-", 2)
-    s = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
-    end_date = s
+    end_date = input_date
 
-    start_date = s-timedelta(days=3)
+    start_date = input_date-timedelta(days=3)
 
     print('------------------------------ LOOOOOOOOOK ------------------------------')
     print(start_date)
@@ -131,39 +140,17 @@ def next():
     
     return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
-def get_week_limit():
-    weight_room = session.query(WeightRoom).first()
-    limit = weight_room.week_limit
-    if (limit== None):
-        limit = 99999999
-    return limit
-
-def get_daily_limit():
-    weight_room = session.query(WeightRoom).first()
-    limit = weight_room.daily_limit
-    if (limit== None):
-        limit = 99999999
-    return limit
-
 @app.route('/previous', methods=['GET', 'POST'])
 def previous():
     log('previous')
-    slots = session.query(Slot).all()
+    slots = getAllSlots()
     days = []
 
-    date_str =request.args.get("start_date").split("-", 2)
-    s = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
-    end_date = s
+    input_date = strToDate(request.args.get("start_date"))
 
-    start_date = s-timedelta(days=5)
-    end_date = s-timedelta(days=2)
+    start_date = input_date-timedelta(days=5)
+    end_date =  input_date-timedelta(days=2)
 
-    print('------------------------------ LOOOOOOOOOK ------------------------------')
-    print(start_date)
-    print(end_date)
-    
-    # start_date = start_date+timedelta(days=1)
-    # end_date = end_date+timedelta(days=1)
     delta = timedelta(days=1)
 
     while start_date <= end_date:
@@ -197,8 +184,7 @@ def weight_rooms():
     start_date = date.today()
     end_date = date.today()+timedelta(days=3)
 
-    print(start_date)
-    slots = session.query(Slot).all()
+    slots = getAllSlots()
     days = []
     delta = timedelta(days=1)
     print('------------------------------ SLOTS ------------------------------')
@@ -224,10 +210,6 @@ def weight_rooms():
         cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
 
         total_daily = cursor.scalar()
-        log('================================================================================================================================================')
-        log('================================================================================================================================================')
-        log('================================================================================================================================================')
-        log('================================================================================================================================================')
         log('----------------------------------------------------------------', total_daily)
         # add temporary calculated field for current user
         slot.daily_reservations = total_daily
@@ -240,10 +222,11 @@ def courses():
     
     status = request.args.get("status")
     # order by start course
-    courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
+    courses=session.query(Instructor.name.label("instructor_name") , Instructor.surname.label("instructor_surname"), Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course, Instructor.id == Course.instructor ).order_by(CourseScheduling.start_hour)
 
     days = []
     print('Before #########################################')
+    log(courses)
     start_date = date(2021, 7, 1)
     end_date = date(2021, 7, 7)
 
@@ -383,111 +366,6 @@ def book_slot():
 
 
     return redirect(url_for('weight_rooms'))
-
-
-#@event.listens_for(Booking, 'before_insert')
-def week_limit_func(mapper, connection, booking):
-
-    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == booking.user)
-    total = cursor.scalar()
-    log('Sum of hours booked : ', total)
-
-    log(mapper)
-    user_bookings = session.query(Booking).filter_by(user=booking.user).count()
-
-    # get related slot from Booking slot
-    slot = session.query(Slot).filter(Slot.id==booking.slot).first()
-
-    # get weight room by id (from related slot)
-    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
-
-    if (weight_room.week_limit != None and total > weight_room.week_limit):
-        log('inside if')
-            #elimina prenotazione slot
-        session.query(Booking).filter_by(slot=booking.slot).delete()
-
-        query = session.query(Slot).filter_by(id=booking.slot).first()
-
-        # si è liberato il posto, aggiungerlo ai disponibili
-        # query.places = query.places+1
-        # log('[unbook_slot] oldPlaces: ', query.places)
-        #end transaction
-        
-        #always close transaction and commit
-        #session.commit()
-        # https://stackoverflow.com/questions/25792332/sqlalchemy-after-insert-doesnt-update-target-object-fields/27483133
-
-
-        log(query)
-        log('################################################################################################################################################')
-        log('################################################################################################################################################')
-        log('################################################################################################################################################')
-        log('################################################################################################################################################')
-        log(booking.slot)
-        #query_delete = 'delete from booking where slot IN  (37, 46, 55, 64)'
-        query_delete_2 = 'delete from booking where slot = '+booking.slot
-        log(query_delete_2)
-        connection.execute(query_delete_2)
-        booking_table = Booking.__table__
-        slot_table = Slot.__table__
-
-        connection.execute(booking_table.delete().where(booking_table.c.slot==booking.slot))
-        #connection.execute("DELETE FROM booking")
-
-        connection.execute(
-            slot_table.update().
-            where(slot_table.c.id==booking.slot).
-            values(places=query.places+1)
-        )
-        #session.commit()
-        return redirect(url_for('weight_rooms'))
-    else:
-        log('inside else')
-        #session.commit()
-
-
-#@event.listens_for(Booking, 'after_insert')
-def week_limit_func(mapper, connection, booking):
-    
-    log(booking)
-    log(mapper)
-    log(connection)
-    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == booking.user)
-    total = cursor.scalar()
-    log('Sum of hours booked : ', total)
-
-    user_bookings = session.query(Booking).filter_by(user=booking.user).count()
-
-    # get related slot from Booking slot
-    slot = session.query(Slot).filter(Slot.id==booking.slot).first()
-
-    # get weight room by id (from related slot)
-    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
-
-    log('my_func2  called: ', user_bookings)
-    log('################################################################################################################################################')
-    log(weight_room.id)
-    log(weight_room.week_limit)
-    log('weight_room_id --> ', slot.weight_room)
-    
-
-    if (weight_room.week_limit != None and total > weight_room.week_limit):
-        log('inside if')
-            #elimina prenotazione slot
-        session.query(Booking).filter_by(slot=booking.slot).delete()
-
-        query = session.query(Slot).filter_by(id=booking.slot).first()
-
-        # si è liberato il posto, aggiungerlo ai disponibili
-        query.places = query.places+1
-        log('[unbook_slot] oldPlaces: ', query.places)
-        #end transaction
-        
-        #always close transaction and commit
-        session.commit()
-    else:
-        log('inside else')
-        session.commit()
     
 
 @app.route('/unbook_slot', methods=['GET', 'POST'])
@@ -510,7 +388,6 @@ def unbook_slot():
         log('[unbook_slot] oldPlaces: ', query.places)
         # end transaction
         session.commit()
-
 
     return redirect(url_for('weight_rooms'))
 
@@ -695,6 +572,19 @@ def test():
     #safe non viene interpretato come html
     return render_template('profile.html', User=u)
 
+def get_week_limit():
+    weight_room = session.query(WeightRoom).first()
+    limit = weight_room.week_limit
+    if (limit== None):
+        limit = 99999999
+    return limit
+
+def get_daily_limit():
+    weight_room = session.query(WeightRoom).first()
+    limit = weight_room.daily_limit
+    if (limit== None):
+        limit = 99999999
+    return limit
 
 if __name__ == '__main__':
     app.run()

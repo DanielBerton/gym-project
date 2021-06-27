@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     __table_args__ = (
         db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
         db.Index('user_email_index', 'email'),
+        db.CheckConstraint('role IN ("owner", "user", "instructor")', name='user_role_list'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     email = db.Column(db.String(100))
@@ -43,7 +44,7 @@ class User(db.Model, UserMixin):
         self.role = role
 
     def __repr__(self):
-        return "<User(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, self.password, self.role)
+        return "<User(id='%s', email='%s', password='%s', role='%s')>" % (self.id, self.email, '*****', self.role)
 
 
 class Owner(User):
@@ -77,15 +78,19 @@ class Member(User, db.Model):
 class Instructor(User, db.Model):
     __tablename__ = 'instructor'
     id = db.Column(Integer, ForeignKey('user.id'), primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    surname = db.Column(db.String(50), nullable=False)
     specialization = db.Column(db.String(100))
 
-    def __init__(self, id, email, password, role, specialization):
+    def __init__(self, id, email, password, role, name, surname, specialization):
         super().__init__(id, email, password, role)
         print('inside super: '+ specialization)
+        self.name = name
+        self.surname = surname
         self.specialization = specialization
 
     def __repr__(self):
-        return "<Instructor(id='%s', email='%s', password='%s', role='%s', specialization='%s')>" % (self.id, self.email, self.password, self.role, self.specialization)
+        return "<Instructor(id='%s', email='%s', password='%s', role='%s', name='%s', surname='%s', specialization='%s')>" % (self.id, self.email, self.password, self.role, self.name, self.surname, self.specialization)
 
 
 class Gym(db.Model):

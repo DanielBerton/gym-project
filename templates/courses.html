@@ -31,6 +31,11 @@
                                 <h5 class="card-title">{{ course.name  }}</h5>
                                 <img class="card-img-top" src="static/img/{{course.course_id}}.jpeg" alt="Card image cap">
                                 <p class="card-text">{{ course.start_hour  }} - {{ course.end_hour  }}</p>
+                                <p>
+                                    <img src="static/img/{{course.instructor_surname}}.png" alt="Avatar" class="avatar">
+                                    {{ course.instructor_name }} {{ course.instructor_surname }}
+                                
+                                </p>
                                 <p>Posti disponibili: {{ course.places  }}</p>
                                 {% if course.id in booked_course  %}
                                     <!-- <form action="/unbook_course" method="GET" ></form>
