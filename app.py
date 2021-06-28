@@ -1,5 +1,4 @@
 from views.courses import _courses, _unbook_course, _book_course
-from views.settings import _setting, _set_daily_limit, _set_week_limit, _update_course, _update_weight_room
 from models import *
 from flask import Flask
 from flask import render_template
@@ -7,6 +6,7 @@ from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager, login_user, logout_user
 from login import login_bp
 from weight_room import wr_bp
+from settings import settings_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +23,7 @@ engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_
 
 app.register_blueprint(login_bp)
 app.register_blueprint(wr_bp)
+app.register_blueprint(settings_bp)
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
@@ -105,31 +106,7 @@ def book_course():
 def unbook_course():
     return _unbook_course()
 
-@app.route('/setting', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def setting():
-    return _setting()
 
-@app.route('/update_weight_room', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def update_weight_room():
-    return _update_weight_room()
-
-@app.route('/update_course', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def update_course():
-    return _update_course()
-
-@app.route('/set_week_limit', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def set_week_limit():
-    return _set_week_limit()
-
-@app.route('/set_daily_limit', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def set_daily_limit():
-    
-    return _set_daily_limit()
 
 if __name__ == '__main__':
     app.run()

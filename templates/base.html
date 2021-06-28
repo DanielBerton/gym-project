@@ -53,7 +53,7 @@
                 </li>
                 {% if user and user.role == "owner"  %}
                   <li class="{{ 'active' if route == '/setting' else '' }}  nav-item">
-                    <a class="nav-link" href="{{ url_for('setting') }}">Configurazione</a>
+                    <a class="nav-link" href="{{ url_for('settings_bp.setting') }}">Configurazione</a>
                   </li>
                 {% endif %} 
               </ul>

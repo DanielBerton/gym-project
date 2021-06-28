@@ -12,13 +12,15 @@ from sqlalchemy import join, update
 from flask_bootstrap import Bootstrap
 from utils import log
 from sqlalchemy import DDL, event, func
+from flask import Blueprint 
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
-app.register_blueprint(login_bp)
+settings_bp = Blueprint('settings_bp', __name__)
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
@@ -33,8 +35,9 @@ session = Session()
 
 db = SQLAlchemy(app, session_options={"autoflush": True})
 
+@settings_bp.route('/setting', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _setting():
+def setting():
     log(current_user.role)
     # bloccare se utente non è owner
     if current_user.role != 'owner':
@@ -50,8 +53,9 @@ def _setting():
 
     return make_response(render_template("setting.html", weight_rooms=weight_rooms, route=request.path, courses=courses, user=current_user, week_limit=week_limit, daily_limit=daily_limit))
 
+@settings_bp.route('/update_weight_room', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _update_weight_room():
+def update_weight_room():
     
     if request.method == 'POST':
         # get params from form
@@ -70,10 +74,11 @@ def _update_weight_room():
             for slot in slots:
                 slot.places = places
     
-    return redirect(url_for('setting'))
+    return redirect(url_for('settings_bp.setting'))
 
+@settings_bp.route('/update_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _update_course():
+def update_course():
     
     if request.method == 'POST':
 
@@ -90,10 +95,11 @@ def _update_course():
             for course_scheduling in course_schedulings:
                 course_scheduling.places = course_places
     
-    return redirect(url_for('setting'))
+    return redirect(url_for('settings_bp.setting'))
 
+@settings_bp.route('/set_week_limit', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _set_week_limit():
+def set_week_limit():
     week_limit = request.form['week_limit']
     log('set_week_limit', week_limit)
 
@@ -108,10 +114,11 @@ def _set_week_limit():
 
         #session.commit()
     
-    return redirect(url_for('setting'))
+    return redirect(url_for('settings_bp.setting'))
 
+@settings_bp.route('/set_daily_limit', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _set_daily_limit():
+def set_daily_limit():
     
     daily_limit = request.form['daily_limit']
     log('set_daily_limit', daily_limit)
@@ -127,7 +134,7 @@ def _set_daily_limit():
             weight_room.daily_limit = daily_limit
 
         #session.commit()
-    return redirect(url_for('setting'))
+    return redirect(url_for('settings_bp.setting'))
 
 
 if __name__ == '__main__':
