@@ -1,4 +1,3 @@
-from views.weight_room import _previous, _next, _weight_rooms,  _select_slot, _book_slot, _unbook_slot,  _booking_list
 from views.courses import _courses, _unbook_course, _book_course
 from views.settings import _setting, _set_daily_limit, _set_week_limit, _update_course, _update_weight_room
 from models import *
@@ -7,6 +6,7 @@ from flask import render_template
 from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager, login_user, logout_user
 from login import login_bp
+from weight_room import wr_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +22,7 @@ app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
 app.register_blueprint(login_bp)
+app.register_blueprint(wr_bp)
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
@@ -35,12 +36,6 @@ Session = sessionmaker(bind = engine, autoflush=True)
 session = Session()
 
 db = SQLAlchemy(app, session_options={"autoflush": True})
-
-def get_user_by_email(email):
-    log('[get_user_by_email] executed', '')
-    user = User.query.filter_by (email=email).first()
-    log('[get_user_by_email] user: ', user)
-    return user
 
 @login_manager.user_loader # definisce la callback
 def load_user(user_id):
@@ -94,52 +89,6 @@ def admin_dashboard():
     log(request.path )
     return make_response(render_template("admin_dashboard.html", user=current_user, route=request.path))
 
-@app.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    log('[logout] executed', '')
-    logout_user()
-    return redirect(url_for('home'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login ():
-    log('[login] executed')
-    if request.method == 'POST':
-
-        email = request.form['user']
-
-        user = User.query.filter_by(email=email).first()
-
-        log('[login] user: ',  user)
-        if (user and user.password is not None):
-            log('[login]', 'OK ' + request.form['password']+ '  ' +user.password)
-            if request.form['password'] == user.password:
-                users = get_user_by_email(request.form['user'])
-                login_user(users)
-                return redirect(url_for('private'))
-        else:
-            return redirect(url_for('home'))
-    else:
-        return redirect(url_for('home'))
-
-@app.route('/bookink_list', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def bookink_list():
-
-    return _booking_list()
-
-@app.route('/next', methods=['GET', 'POST'])
-def next():
-    return _next()
-
-@app.route('/previous', methods=['GET', 'POST'])
-def previous():
-    return _previous()
-    
-@app.route('/weight_rooms', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def weight_rooms():
-    return _weight_rooms()
 
 @app.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -155,21 +104,6 @@ def book_course():
 @login_required # richiede autenticazione
 def unbook_course():
     return _unbook_course()
-
-@app.route('/select_slot', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def select_slot():
-    return _select_slot()
-
-@app.route('/book_slot', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def book_slot():
-    return _book_slot()
-
-@app.route('/unbook_slot', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def unbook_slot():
-    return _unbook_slot()
 
 @app.route('/setting', methods=['GET', 'POST'])
 @login_required # richiede autenticazione

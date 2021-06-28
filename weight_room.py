@@ -4,7 +4,6 @@ from flask import Flask
 from flask import render_template
 from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager
-from login import login_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -15,13 +14,20 @@ from utils import log
 from datetime import datetime
 from sqlalchemy import DDL, event, func
 
+from flask import request
+from flask import redirect
+from flask import url_for
+from flask import Blueprint 
+from flask_login import login_user
+from models import *
+from utils.log import log
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
-app.register_blueprint(login_bp)
-
+wr_bp = Blueprint('wr_bp', __name__)
 metadata = MetaData()
 bootstrap = Bootstrap(app)
 
@@ -35,7 +41,9 @@ session = Session()
 
 db = SQLAlchemy(app, session_options={"autoflush": True})
 
-def _next():
+@wr_bp.route('/next', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def next():
     log('next')
     slots = getAllSlots()
     days = []
@@ -71,7 +79,9 @@ def _next():
     
     return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
-def _previous():
+@wr_bp.route('/previous', methods=['GET', 'POST'])
+@login_required # richiede autenticazione
+def previous():
     log('[previous]')
     slots = getAllSlots()
     days = []
@@ -107,8 +117,9 @@ def _previous():
 
     return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
+@wr_bp.route('/weight_rooms', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _weight_rooms():
+def weight_rooms():
 
     log('[weight_rooms] called')
     start_date = date.today()
@@ -145,8 +156,9 @@ def _weight_rooms():
 
     return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()  ))
 
+@wr_bp.route('/select_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _select_slot():
+def select_slot():
     selected_slot =request.args.get("slot_id")
 
     # get slot from id
@@ -168,8 +180,9 @@ def _select_slot():
 
     return resp
 
+@wr_bp.route('/book_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _book_slot():
+def book_slot():
     log('[book_slot]')
 
     # get params from request args
@@ -189,18 +202,20 @@ def _book_slot():
     
         # end transaction
 
-    return redirect(url_for('weight_rooms'))
+    return redirect(url_for('wr_bp.weight_rooms'))
 
+@wr_bp.route('/booking_list', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _booking_list():
+def booking_list():
 
     booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
     log(booking_list)
 
     return make_response(render_template("total_booking_list.html", user=current_user, booking_list=booking_list))
 
+@wr_bp.route('/unbook_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _unbook_slot():
+def unbook_slot():
     # get params from request args
     slot_id =request.args.get("slot_id")
     log('unbook_slot id: ', slot_id)
@@ -219,7 +234,7 @@ def _unbook_slot():
         log('[unbook_slot] oldPlaces: ', query.places)
         # end transaction
 
-    return redirect(url_for('weight_rooms'))
+    return redirect(url_for('wr_bp.weight_rooms'))
 
 def get_week_limit():
     weight_room = session.query(WeightRoom).first()

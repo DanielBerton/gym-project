@@ -1,0 +1,96 @@
+
+
+TODO
+
+- Dare possibilità di avere più palestre
+- Generare calendario di accessi scaglionati per stesso slot (es utente a inizia alle ore 10:01, utente b alle 10:02)
+    conta gli slot e aaggiunge un minut per ogni slot per l'ingresso
+
+- rivedere gestione transazioni (almeno ridenominare in start_traansaction())
+- difesa sqlInjection
+
+
+- nome istruttore su i corsi OK
+- check sui ruoli OK
+- Indici su query più frequenti OK
+- definizione di ruoli OK
+    
+Admin
+
+- cambiare posti per ogni slot OK
+
+- Visualizzare solo slot puliti, al click portare a lista prenotazioni per slot (già presente) OK
+
+
+Documento
+
+- scrivere come si sono gestite sqlInjection
+- capitolo Integrità e sicurezza
+- spiegare che si è gestito i ruoli con user.role, se non autorizzato blocca la rotta
+- se utente non autorizzato:
+    @login_manager.unauthorized_handler
+    def unauthorized():
+
+- rotte e verifica pagine passando route=request.path
+
+
+
+
+
+su owner sono nullable i campi name surname e company_name
+ma c'è un vincolo che obbliga ad inserire nome e cognome (se ditta individuale) o company name (se società)
+
+(name NOT NULL) and (surname NOT NULL) or (company_name NOT NULL)
+
+
+WeightRoom:
+    - nome deve essere univo
+    - la dimensione non può essere inferirore a 0
+    - i posti devono essere un rapporto con le dimensioni (persone metro quadrato, una persona ogni 2mq)
+
+
+User
+    - la coppia email e role deve essere unica
+      db.UniqueConstraint('email', 'role', name='uniq_exec_email_role'),
+
+
+
+
+i corsi hanno cadenza settianale, (ogni lunedi, ogni martedi ecc) l'applicazione fa vedere solo quelli da oggi a tra 7 giorni
+
+
+
+
+
+Indici
+
+le query più utilizzate :
+
+User per email
+
+Slot per dataI
+
+Booking user
+
+
+
+
+# Flask-Login
+# lezione https://unive.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=ad582be6-088e-4820-b886-ad0c00b19878
+
+# Tutorato
+# https://unive.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=6632cdc0-bf10-44a0-abeb-ad1300820204
+
+# Tema 2 Appunti
+
+Calendario di slot orari (es 1h 30min)
+Per ogni slot ci deve essere una politica di controllo degli accessi
+Per esempio in ogni slot possono entrare max 10 persone contemporaneamnte
+
+Definire delle policy, ad esempio non è possibile prenotare più di 3 volte a settimana per poter permettere a tutti di prenotare 
+
+Contact tracing, tenere traccia sotrico prenotazioni ultima settimana (trigger)
+
+Definire dei ruoi e politiche di autorizzazione
+
+Transazioni

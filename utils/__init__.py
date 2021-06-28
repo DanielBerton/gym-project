@@ -1,1 +1,2 @@
-from .util import log, get_session
+from .util import get_session
+from .log import log

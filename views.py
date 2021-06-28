@@ -55,5 +55,5 @@ def unbook_slot():
         db.session.commit()
 
 
-    return redirect(url_for('weight_rooms'))
+    return redirect(url_for('wr_bp.weight_rooms'))
 

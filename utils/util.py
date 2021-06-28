@@ -1,5 +1,6 @@
 
 from models import *
+from .log import log
 from flask import Flask
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, load_only
@@ -23,12 +24,6 @@ session = Session()
 
 db = SQLAlchemy(app)
 from contextlib import contextmanager
-
-
-# Logger method
-# param message is optional
-def log(method, message=''):
-    print(method, message)
 
 
 @contextmanager

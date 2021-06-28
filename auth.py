@@ -36,12 +36,4 @@ def login ():
     else:
         return redirect(url_for('home'))
 
-@app.route('/logout', methods=['GET', 'POST'])
-@login_bp.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    log('[logout] executed', '')
-    logout_user()
-    return redirect(url_for('home'))
-
 

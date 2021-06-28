@@ -18,7 +18,7 @@
                 </form>
             </li>
             <li class="page-item">
-                <form action="{{ url_for('weight_rooms') }}" method="GET">
+                <form action="{{ url_for('wr_bp.weight_rooms') }}" method="GET">
                     <button type="submit" class="page-link">1</button>
                 </form>
             </li>
@@ -32,7 +32,7 @@
     </nav>
 
     {% if user.role == 'owner' %}
-    <form action="/bookink_list" method="GET" >
+    <form action="/booking_list" method="GET" >
         <button type="submit" class="btn-outline-primary btn">
             Visualizza lista totale prenotazioni
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">

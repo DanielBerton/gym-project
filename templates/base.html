@@ -46,7 +46,7 @@
                     </li>
                 {% endif %} 
                 <li class="{{ 'active' if route == '/weight_rooms'  or route == '/previous' or route == '/next' else '' }} nav-item">
-                  <a class="nav-link" href="{{ url_for('weight_rooms') }}">Sala Pesi</a>
+                  <a class="nav-link" href="{{ url_for('wr_bp.weight_rooms') }}">Sala Pesi</a>
                 </li>
                 <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
                   <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>

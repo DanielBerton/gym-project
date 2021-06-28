@@ -3,7 +3,6 @@ from flask import Flask
 from flask import render_template
 from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager, UserMixin, login_user, logout_user
-from login import login_bp
 from sqlalchemy import *
 from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import relationship, sessionmaker
@@ -12,7 +11,6 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.register_blueprint(login_bp)
 
 metadata = MetaData()
 
