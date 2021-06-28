@@ -18,7 +18,7 @@
         {% if is_booked %}
         <p><b>Disdici Slot</b></p>
         <p>{{ slot.day }} </p>
-        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+        <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
         <p>Posti disponibili: {{ slot.places }}</p>
         Prenotazione per l'utente: {{ user.email }}
         <form action="/unbook_slot" method="GET">
@@ -29,7 +29,7 @@
         <p><b>Prenota Slot</b></p>
         <p>Giorno: {{ slot.day }} </p>
         <p>ID: {{ slot.id }} </p>
-        <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+        <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
         Prenotazione per l'utente: {{ user.email }}
         <p>Posti disponibili: {{ slot.places }}</p>
         <form action="/book_slot" method="GET">

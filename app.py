@@ -1,20 +1,17 @@
-from typing import ContextManager
 from utils.util import get_session
 from models import *
 from flask import Flask
 from flask import render_template
 from flask import request, redirect, url_for, make_response
-from flask_login import login_required, current_user, login_manager, LoginManager, UserMixin, login_user, logout_user
+from flask_login import login_required, current_user, login_manager, LoginManager, login_user, logout_user
 from login import login_bp
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker, load_only, aliased
+from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join, update
-from sqlalchemy.sql import select
 from flask_bootstrap import Bootstrap
 from datetime import date, timedelta
-from contextlib import contextmanager
-from utils import log, transaction
+from utils import log
 from datetime import datetime
 from sqlalchemy import DDL, event, func
 
@@ -74,27 +71,16 @@ def private ():
     users = User.query.all()
     log('[private] users ', users)
 
+    # check role, if owner go to admin_dashboard, else standard private page
     if (user.role == 'owner'):
         resp = make_response(render_template("admin_dashboard.html", users=users, user=user, route=request.path))
     else:
         resp = make_response(render_template("private.html", users=users, user=user, route=request.path))
-    #gyms = session.query(Gym, WeightRoom).filter(Gym.id==WeightRoom.gym).all()
 
-    golden = session.query(Gym).join(WeightRoom).filter(Gym.id == WeightRoom.gym).first()
+    golden = session.query(Gym).join(WeightRoom).filter(Gym.id == WeightRoom.gym, Gym.id == 1).first()
 
-    # gyms = Gym.query.all()
-    log(golden)
+    log('[private] golden: ', golden)
     return resp
-
-def getAllSlots():
-    slots = session.query(Slot).all()
-
-    return slots
-
-def strToDate(date_str):
-    date_str = date_str.split("-", 2)
-    new_date = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
-    return new_date
 
 @app.route('/next', methods=['GET', 'POST'])
 def next():
@@ -107,12 +93,6 @@ def next():
 
     start_date = input_date-timedelta(days=3)
 
-    print('------------------------------ LOOOOOOOOOK ------------------------------')
-    print(start_date)
-    print(end_date)
-    
-    # start_date = start_date+timedelta(days=1)
-    # end_date = end_date+timedelta(days=1)
     delta = timedelta(days=1)
 
     while start_date <= end_date:
@@ -126,7 +106,7 @@ def next():
     today = datetime.today()
     end_weed = today+timedelta(days=7) #calculate a week today + 7
     # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
     total_week = cursor.scalar()
     log(datetime.today().strftime('%Y-%m-%d'))
     log(total_week)
@@ -142,7 +122,7 @@ def next():
 
 @app.route('/previous', methods=['GET', 'POST'])
 def previous():
-    log('previous')
+    log('[previous]')
     slots = getAllSlots()
     days = []
 
@@ -164,7 +144,7 @@ def previous():
     today = datetime.today()
     end_weed = today+timedelta(days=7) #calculate a week today + 7
     # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
     total_week = cursor.scalar()
     log(datetime.today().strftime('%Y-%m-%d'))
     log(total_week)
@@ -187,7 +167,7 @@ def weight_rooms():
     slots = getAllSlots()
     days = []
     delta = timedelta(days=1)
-    print('------------------------------ SLOTS ------------------------------')
+    log('------------------------------ SLOTS ------------------------------')
 
     while start_date <= end_date:
         days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
@@ -200,7 +180,8 @@ def weight_rooms():
     today = datetime.today()
     end_weed = today+timedelta(days=7)
     # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hourTo-Slot.hourFrom), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    log('################################################################################################################################################################')
     total_week = cursor.scalar()
     log(datetime.today().strftime('%Y-%m-%d'))
     log(total_week)
@@ -208,9 +189,14 @@ def weight_rooms():
     for slot in slots:
 
         cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
+        """
+            SELECT count(booking.id) AS count_1 
+            FROM booking, slot 
+            WHERE booking.user = ? AND slot.id = booking.slot AND slot.date = ?
+        """
 
         total_daily = cursor.scalar()
-        log('----------------------------------------------------------------', total_daily)
+
         # add temporary calculated field for current user
         slot.daily_reservations = total_daily
 
@@ -225,10 +211,9 @@ def courses():
     courses=session.query(Instructor.name.label("instructor_name") , Instructor.surname.label("instructor_surname"), Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course, Instructor.id == Course.instructor ).order_by(CourseScheduling.start_hour)
 
     days = []
-    print('Before #########################################')
     log(courses)
-    start_date = date(2021, 7, 1)
-    end_date = date(2021, 7, 7)
+    start_date = datetime.today()
+    end_date = start_date+timedelta(days=6 )
 
     
     delta = timedelta(days=1)
@@ -243,7 +228,7 @@ def courses():
     # if owner get all course reservation
     if (current_user.role == 'owner'):
         all_bookings = session.query(BookingCourse.id, CourseScheduling.id, Course.name, Member.email, CourseScheduling.day_of_week) .filter(BookingCourse.member == Member.id, BookingCourse.course_scheduling == CourseScheduling.id, CourseScheduling.course == Course.id).all()
-        log('################################################################################')
+
         log(all_bookings)
         return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course, status=status, all_bookings=all_bookings))
 
@@ -268,7 +253,7 @@ def book_course():
         log('[book_course] oldPlaces: ', course_scheduling.places)
         # end transaction
         session.commit()
-    status = 'booked'
+        status = 'booked'
     return redirect(url_for('courses', status=status))     
 
 @app.route('/unbook_course', methods=['GET', 'POST'])
@@ -290,8 +275,8 @@ def unbook_course():
         query.places = query.places+1
         log('[unbook_course] oldPlaces: ', query.places)
         # end transaction
-        db.session.commit()
-    status = 'unbooked'
+        #db.session.commit()
+        status = 'unbooked'
     return redirect(url_for('courses', status=status))
 
 @app.route('/admin_dashboard', methods=['GET', 'POST'])
@@ -315,7 +300,6 @@ def select_slot():
     is_booked = slot.id in bookings
     log('isBooked: ', is_booked)
 
-
     if (user.role == 'owner'):
         # prendiamo tuttgli gli utenti che hanno prenotato questo slot
         booking_list = session.query(Booking, User.email).filter_by(slot=slot.id, user=User.id).all()
@@ -332,40 +316,39 @@ def book_slot():
     slot_id =request.args.get("slot_id")
 
 
-
-    cursor = session.query(func.sum(Slot.hourTo-Slot.hourFrom)).filter(Slot.id == Booking.slot, Booking.user == current_user.id)
-    total = cursor.scalar()
-    log('Sum of hours booked : ', total)
-
-    # get related slot from Booking slot
-    slot = session.query(Slot).filter(Slot.id==slot_id).first()
-    log('================================================================================================================================================')
-    log('================================================================================================================================================')
-    log(slot_id)
-    log('================================================================================================================================================')
-    log('================================================================================================================================================')
-
-    # get weight room by id (from related slot)
-    weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
-
-    # if (weight_room.week_limit != None and total > weight_room.week_limit):
-    #     log('limit exceeded')
+    with get_session() as session:
         
 
-    # book slot for this user
-    # start transaction
-    booking = Booking(current_user.id, slot_id) # prenota slot
+        # # get related slot from Booking slot
+        # slot = session.query(Slot).filter(Slot.id==slot_id).first()
+        # log('================================================================================================================================================')
+        # log('================================================================================================================================================')
+        # log(slot_id)
+        # log('================================================================================================================================================')
+        # log('================================================================================================================================================')
 
-    session.add(booking)
-    #db.session.commit()
+        # # get weight room by id (from related slot)
+        # weight_room = session.query(WeightRoom).filter_by(id=slot.weight_room).first()
 
-    query = session.query(Slot).filter_by(id=slot_id).first()
+        # # if (weight_room.week_limit != None and total > weight_room.week_limit):
+        # #     log('limit exceeded')
+            
 
-    query.places = query.places-1
-    log('[book_slot] oldPlaces: ', query.places)
-    # end transaction
-    session.commit()
+        # book slot for this user
+        # start transaction
+        booking = Booking(current_user.id, slot_id) # prenota slot
 
+        session.add(booking)
+        #db.session.commit()
+
+        query = session.query(Slot).filter_by(id=slot_id).first()
+
+
+        query.places = query.places-1
+        log('[book_slot] oldPlaces: ', query.places)
+    
+        # end transaction
+        #session.commit()
 
     return redirect(url_for('weight_rooms'))
     
@@ -389,16 +372,14 @@ def unbook_slot():
         query.places = query.places+1
         log('[unbook_slot] oldPlaces: ', query.places)
         # end transaction
-        session.commit()
+        #session.commit()
 
     return redirect(url_for('weight_rooms'))
 
 @app.route('/unauthorized', methods=['GET', 'POST'])
 @login_manager.unauthorized_handler
 def unauthorized():
-    # do stuff
-    log('######################### unauthorized ####################################')
-    log(request.path)
+    log('[unauthorized] called', current_user)
     return make_response(render_template("unauthorized.html", route=request.path))
 
 @app.route('/setting', methods=['GET', 'POST'])
@@ -408,7 +389,8 @@ def setting():
     # bloccare se utente non è owner
     if current_user.role != 'owner':
          return redirect(url_for('unauthorized'))
-    #courses=session.query(Course.id.label("course_id"), CourseScheduling.id, CourseScheduling.places, CourseScheduling.day_of_week,  CourseScheduling.start_hour, CourseScheduling.end_hour, Course.name).filter(Course.id == CourseScheduling.course).order_by(CourseScheduling.start_hour)
+    #courses = session.query(Course.name, Course.places, CourseScheduling.day_of_week, CourseScheduling.start_hour, CourseScheduling.end_hour).filter(CourseScheduling.course==Course.id ).distinct(Course.name, Course.places, CourseScheduling.day_of_week)
+   
     courses = session.query(Course).all()
     weight_rooms = db.session.query(WeightRoom).all()
 
@@ -570,11 +552,11 @@ def login ():
 @login_required # richiede autenticazione
 def bookink_list():
 
-    booking_list = session.query(Booking, User.email, Slot.date, Slot.hourFrom, Slot.hourTo, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
+    booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
 
     log(booking_list)
     """
-        SELECT booking.id AS booking_id, booking.user AS booking_user, booking.slot AS booking_slot, user.email AS user_email, slot.date AS slot_date, slot."hourFrom" AS "slot_hourFrom", slot."hourTo" AS "slot_hourTo", slot.id AS slot_id 
+        SELECT booking.id AS booking_id, booking.user AS booking_user, booking.slot AS booking_slot, user.email AS user_email, slot.date AS slot_date, slot."hour_from" AS "slot_hour_from", slot."hour_to" AS "slot_hour_to", slot.id AS slot_id 
         FROM booking, user, slot 
         WHERE booking.user = user.id AND booking.slot = slot.id 
         ORDER BY slot.date
@@ -603,6 +585,16 @@ def get_daily_limit():
     if (limit== None):
         limit = 99999999
     return limit
+
+def getAllSlots():
+    slots = session.query(Slot).all()
+
+    return slots
+
+def strToDate(date_str):
+    date_str = date_str.split("-", 2)
+    new_date = date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+    return new_date
 
 if __name__ == '__main__':
     app.run()

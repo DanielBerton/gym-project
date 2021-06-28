@@ -142,21 +142,21 @@ class Slot(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
     day = db.Column(db.Integer)
     date = db.Column(db.Date)
-    hourFrom = db.Column(db.String(100))
-    hourTo = db.Column(db.String(100))
+    hour_from = db.Column(db.String(100))
+    hour_to = db.Column(db.String(100))
     places = db.Column(db.Integer)
     weight_room = db.Column(Integer, ForeignKey('weight_room.id'))
 
-    def __init__(self, day, date, hourFrom, hourTo, places, weight_room ):
+    def __init__(self, day, date, hour_from, hour_to, places, weight_room ):
         self.day = day
         self.date = date
-        self.hourFrom = hourFrom
-        self.hourTo = hourTo
+        self.hour_from = hour_from
+        self.hour_to = hour_to
         self.places = places
         self.weight_room  = weight_room
 
     def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.weight_room )
+        return "<Slot(id='%s', day='%d', date='%s', hour_from='%s', hour_to='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hour_from, self.hour_to, self.places, self.weight_room )
 
 # Gym slot booking
 class Booking(db.Model):
@@ -193,7 +193,7 @@ class Course(db.Model):
 class CourseScheduling(db.Model):
     __tablename__ = 'course_scheduling'
     __table_args__ = (
-        db.Index('start_hour_index', 'start_hour'),
+        db.Index('course_scheduling_start_hour_index', 'start_hour'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     day_of_week = db.Column(db.String(50))
@@ -239,15 +239,15 @@ end_date = date(2021, 7, 31)
 delta = timedelta(days=1)
 while start_date <= end_date:
     db.session.add_all([
-        Slot(day=start_date.day ,date=start_date, hourFrom='9:00', hourTo='10:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='10:00', hourTo='11:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='12:00', hourTo='13:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='14:00', hourTo='15:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='16:00', hourTo='17:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day, date=start_date, hourFrom='17:00', hourTo='18:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day, date=start_date, hourFrom='18:00', hourTo='19:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='19:00', hourTo='20:00', places=room_1.places, weight_room =room_1.id),
-        Slot(day=start_date.day ,date=start_date, hourFrom='20:00', hourTo='21:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='9:00', hour_to='10:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='10:00', hour_to='11:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='12:00', hour_to='13:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='14:00', hour_to='15:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='16:00', hour_to='17:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day, date=start_date, hour_from='17:00', hour_to='18:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day, date=start_date, hour_from='18:00', hour_to='19:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='19:00', hour_to='20:00', places=room_1.places, weight_room =room_1.id),
+        Slot(day=start_date.day ,date=start_date, hour_from='20:00', hour_to='21:00', places=room_1.places, weight_room =room_1.id),
     ])
     start_date += delta
 

@@ -26,17 +26,19 @@
         
                         {% if course.day_of_week in day.day_name  %}
                             
-                            <div class="card p-10" style="width: 12rem; margin-top: 10px;">
+                            <div class="card p-10" style="width: 11rem; margin-top: 10px;">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ course.name  }}</h5>
                                     <img class="card-img-top" src="static/img/{{course.course_id}}.jpeg" alt="Card image cap">
                                     <p class="card-text">{{ course.start_hour  }} - {{ course.end_hour  }}</p>
+                                    <p class="text-info"><b>Istruttore:</b></p>
                                     <p>
                                         <img src="static/img/{{course.instructor_surname}}.png" alt="Avatar" class="avatar">
                                         {{ course.instructor_name }} {{ course.instructor_surname }}
                                     
                                     </p>
-                                    <p>Posti disponibili: {{ course.places  }}</p>
+                                    <span class="text-info"><b>Posti disponibili:</b></span>
+                                    <p>{{ course.places  }}</p>
                                     {% if course.id in booked_course  %}
                                         <form action="/unbook_course" method="GET" >
                                             <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="btn btn-outline-warning">

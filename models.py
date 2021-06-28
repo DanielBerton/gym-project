@@ -34,8 +34,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
     role = db.Column(db.String(50), nullable=False)
-    #CHeck su role può essere solo owner, member eecc
-    #__mapper_args__ = {'polymorphic_on': email }
 
     def __init__(self, id, email, password, role):
         self.id = id
@@ -146,21 +144,21 @@ class Slot(db.Model):
     id = db.Column('id', db.Integer, primary_key = True)
     day = db.Column(db.Integer)
     date = db.Column(db.Date)
-    hourFrom = db.Column(db.String(100))
-    hourTo = db.Column(db.String(100))
+    hour_from = db.Column(db.String(100))
+    hour_to = db.Column(db.String(100))
     places = db.Column(db.Integer)
     weight_room = db.Column(Integer, ForeignKey('weight_room.id'))
 
-    def __init__(self, day, date, hourFrom, hourTo, places, weight_room ):
+    def __init__(self, day, date, hour_from, hour_to, places, weight_room ):
         self.day = day
         self.date = date
-        self.hourFrom = hourFrom
-        self.hourTo = hourTo
+        self.hour_from = hour_from
+        self.hour_to = hour_to
         self.places = places
         self.weight_room  = weight_room
 
     def __repr__(self):
-        return "<Slot(id='%s', day='%d', date='%s', hourFrom='%s', hourTo='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hourFrom, self.hourTo, self.places, self.weight_room )
+        return "<Slot(id='%s', day='%d', date='%s', hour_from='%s', hour_to='%s', places='%d', weight_room ='%d')>" % (self.id, self.day, self.date, self.hour_from, self.hour_to, self.places, self.weight_room )
 
 # Gym slot booking
 class Booking(db.Model):
@@ -197,7 +195,7 @@ class Course(db.Model):
 class CourseScheduling(db.Model):
     __tablename__ = 'course_scheduling'
     __table_args__ = (
-        db.Index('start_hour_index', 'start_hour'),
+        db.Index('course_scheduling_start_hour_index', 'start_hour'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     day_of_week = db.Column(db.String(50))

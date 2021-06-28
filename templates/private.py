@@ -33,7 +33,7 @@ db = SQLAlchemy(app)
 @app.route('/private')
 @login_required # richiede autenticazione
 def private ():
-
+    log('######################################## private ###############################################')
     if current_user.is_authenticated:
         log('is_authenticated')
         user = current_user

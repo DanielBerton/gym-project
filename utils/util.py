@@ -28,9 +28,7 @@ from contextlib import contextmanager
 # Logger method
 # param message is optional
 def log(method, message=''):
-    print('---------------------------------------------------------------------------------------------------')
     print(method, message)
-    print('---------------------------------------------------------------------------------------------------')
 
 
 @contextmanager

@@ -62,7 +62,7 @@
                                 <h5 class="card-title">Slot</h5>
                                 <p class="card-text">Fascia oraira</p>
                                 <p>Posti: {{ slot.places }}</p>
-                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
                                 <form action="/select_slot" method="GET">
                                     <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
                                         class="btn-primary btn">
@@ -85,7 +85,7 @@
                                 <h5 class="card-title">Disdici Slot</h5>
                                 <p class="card-text">Fascia oraira</p>
                                 <p>Posti: {{ slot.places }}</p>
-                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
                                 <form action="/select_slot" method="GET">
                                     <button type="submit" name="slot_id" id="slot_id" value="{{slot.id}}"
                                         class="{{ 'btn-danger' if slot.places < 1 else 'btn-warning' }} btn">
@@ -106,7 +106,7 @@
                                 <h5 class="card-title">Prenota Slot</h5>
                                 <p class="card-text">Fascia oraira</p>
                                 <p>Posti: {{ slot.places }}</p>
-                                <p>{{ slot.hourFrom }} - {{ slot.hourTo }} </p>
+                                <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
                                 <!-- {# START MODAL #} -->
                                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
