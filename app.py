@@ -1,4 +1,4 @@
-from views.weight_room import _previous, _next, _weight_rooms,  _select_slot, _book_slot, _unbook_slot
+from views.weight_room import _previous, _next, _weight_rooms,  _select_slot, _book_slot, _unbook_slot,  _booking_list
 from views.courses import _courses, _unbook_course, _book_course
 from views.settings import _setting, _set_daily_limit, _set_week_limit, _update_course, _update_weight_room
 from models import *
@@ -126,10 +126,7 @@ def login ():
 @login_required # richiede autenticazione
 def bookink_list():
 
-    booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
-    log(booking_list)
-
-    return make_response(render_template("total_booking_list.html", user=current_user, booking_list=booking_list))
+    return _booking_list()
 
 @app.route('/next', methods=['GET', 'POST'])
 def next():

@@ -46,10 +46,16 @@
                                             </button>
                                         </form>
                                     {% else %}
-                                        <form action="/book_course" method="GET" >
-                                            <button type="submit" name="course_id" id="course_id" value="{{course.id}}" class="{{ 'btn-outline-danger' if course.places < 1 else 'btn-outline-success' }} btn">
-                                                Prenota
-                                            </button>
+                                    <form action="/book_course" method="GET" >
+                                            {% if course.places < 1  %}
+                                                <button type="submit" name="course_id" id="course_id" value="{{course.id}}" disabled="true" class="{{ 'btn-outline-danger' if course.places < 1 else 'btn-outline-success' }} btn">
+                                                    Prenota
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" name="course_id" id="course_id" value="{{course.id}}"  class="{{ 'btn-outline-danger' if course.places < 1 else 'btn-outline-success' }} btn">
+                                                    Prenota
+                                                </button>
+                                            {% endif %} 
                                         </form>
                                     {% endif %} 
                                 </div>

@@ -190,7 +190,15 @@ def _book_slot():
         # end transaction
 
     return redirect(url_for('weight_rooms'))
-    
+
+@login_required # richiede autenticazione
+def _booking_list():
+
+    booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
+    log(booking_list)
+
+    return make_response(render_template("total_booking_list.html", user=current_user, booking_list=booking_list))
+
 @login_required # richiede autenticazione
 def _unbook_slot():
     # get params from request args
