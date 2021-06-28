@@ -12,7 +12,7 @@
         <title>Gym app</title>
     </head>
     <header>
-      {% if route != 'login' and route != '/unauthorized' %}
+      {% if route != 'login' and route != '/unauthorized' and user %}
       <!-- Navbar -->
       
         <nav class="header navbar navbar-expand-lg navbar-dark bg-dark">
@@ -59,7 +59,9 @@
               </ul>
             </div>
             <img src="static/img/avatar_man.png" alt="Avatar" class="avatar">
-            <span class="user">Ciao {{user.email}}</span>
+            {% if user %}
+              <span class="user">Ciao {{user.email}}</span>
+              {% endif %} 
           </div>
           <form action="/logout" method="POST" class="form-inline my-2 my-lg-0">
             <button class="btn btn-outline-light" type="submit">Logout</button>
