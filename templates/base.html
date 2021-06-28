@@ -49,7 +49,7 @@
                   <a class="nav-link" href="{{ url_for('wr_bp.weight_rooms') }}">Sala Pesi</a>
                 </li>
                 <li class="{{ 'active' if route == '/courses' else '' }}  nav-item">
-                  <a class="nav-link" href="{{ url_for('courses') }}">Corsi</a>
+                  <a class="nav-link" href="{{ url_for('courses_bp.courses') }}">Corsi</a>
                 </li>
                 {% if user and user.role == "owner"  %}
                   <li class="{{ 'active' if route == '/setting' else '' }}  nav-item">

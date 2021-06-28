@@ -4,7 +4,6 @@ from flask import Flask
 from flask import render_template
 from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager
-from login import login_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy

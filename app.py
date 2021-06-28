@@ -1,4 +1,3 @@
-from views.courses import _courses, _unbook_course, _book_course
 from models import *
 from flask import Flask
 from flask import render_template
@@ -7,6 +6,7 @@ from flask_login import login_required, current_user, login_manager, LoginManage
 from login import login_bp
 from weight_room import wr_bp
 from settings import settings_bp
+from courses import courses_bp
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -24,6 +24,8 @@ engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_
 app.register_blueprint(login_bp)
 app.register_blueprint(wr_bp)
 app.register_blueprint(settings_bp)
+app.register_blueprint(courses_bp)
+
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
@@ -89,22 +91,6 @@ def unauthorized():
 def admin_dashboard():
     log(request.path )
     return make_response(render_template("admin_dashboard.html", user=current_user, route=request.path))
-
-
-@app.route('/courses', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def courses():
-    return _courses()
-
-@app.route('/book_course', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def book_course():
-    return _book_course()
-
-@app.route('/unbook_course', methods=['GET', 'POST'])
-@login_required # richiede autenticazione
-def unbook_course():
-    return _unbook_course()
 
 
 

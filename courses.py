@@ -14,13 +14,14 @@ from datetime import timedelta
 from utils import log
 from datetime import datetime
 from sqlalchemy import DDL, event
+from flask import Blueprint 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
-app.register_blueprint(login_bp)
+courses_bp = Blueprint('courses_bp', __name__)
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
@@ -35,8 +36,9 @@ session = Session()
 
 db = SQLAlchemy(app, session_options={"autoflush": True})
 
+@courses_bp.route('/courses', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _courses():
+def courses():
     
     status = request.args.get("status")
     # order by start course
@@ -64,8 +66,9 @@ def _courses():
 
     return make_response(render_template("courses.html", user=current_user, route=request.path, courses=courses, days=days, booked_course=booked_course, status=status))
 
+@courses_bp.route('/book_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _book_course():
+def book_course():
     select_course =request.args.get("course_id")
 
     # start transaction
@@ -82,10 +85,11 @@ def _book_course():
 
         # set status to shouw popup to user
         status = 'booked'
-    return redirect(url_for('courses', status=status))     
+    return redirect(url_for('courses_bp.courses', status=status))     
 
+@courses_bp.route('/unbook_course', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
-def _unbook_course():
+def unbook_course():
     select_course =request.args.get("course_id")
     log('unbook_course id: ', select_course)
     log('unbook_course user id: ', current_user.id)
@@ -104,7 +108,7 @@ def _unbook_course():
         # end transaction
         # set status to shouw popup to user
         status = 'unbooked'
-    return redirect(url_for('courses', status=status))
+    return redirect(url_for('courses_bp.courses', status=status))
 
 
 if __name__ == '__main__':
