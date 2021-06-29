@@ -46,8 +46,7 @@ db = SQLAlchemy(app, session_options={"autoflush": True})
 @login_required # richiede autenticazione
 def next():
     log('[next] called')
-    slots = getAllSlots()
-    days = []
+ 
     input_date = strToDate(request.args.get("start_date"))
 
     end_date = input_date
@@ -56,36 +55,12 @@ def next():
 
     delta = timedelta(days=1)
 
-    while start_date <= end_date:
-        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
-        start_date += delta
-
-    # get all slot booked for current user
-    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
-    log('[weight_rooms] booking ids: ', bookings)
-
-    today = datetime.today()
-    end_weed = today+timedelta(days=7) #calculate a week today + 7
-    # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
-    total_week = cursor.scalar()
-    log(datetime.today().strftime('%Y-%m-%d'))
-    log(total_week)
-
-    for slot in slots:
-        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
-        total_daily = cursor.scalar()
-        # add temporary calculated field for current user
-        slot.daily_reservations = total_daily
-    
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
+    return loadSlots(start_date=start_date, end_date=end_date, delta=delta)
 
 @wr_bp.route('/previous', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def previous():
     log('[previous]')
-    slots = getAllSlots()
-    days = []
 
     input_date = strToDate(request.args.get("start_date"))
 
@@ -94,29 +69,7 @@ def previous():
 
     delta = timedelta(days=1)
 
-    while start_date <= end_date:
-        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
-        start_date += delta
-
-    # get all slot booked for current user
-    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
-    log('[weight_rooms] booking ids: ', bookings)
-
-    today = datetime.today()
-    end_weed = today+timedelta(days=7) #calculate a week today + 7
-    # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
-    total_week = cursor.scalar()
-    log(datetime.today().strftime('%Y-%m-%d'))
-    log(total_week)
-
-    for slot in slots:
-        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
-        total_daily = cursor.scalar()
-        # add temporary calculated field for current user
-        slot.daily_reservations = total_daily
-
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
+    return loadSlots(start_date=start_date, end_date=end_date, delta=delta)
 
 @wr_bp.route('/weight_rooms', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -126,35 +79,9 @@ def weight_rooms():
     start_date = date.today()
     end_date = date.today()+timedelta(days=3)
 
-    slots = getAllSlots()
-    days = []
     delta = timedelta(days=1)
 
-    while start_date <= end_date:
-        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
-        start_date += delta
-
-    # get all slot booked for current user
-    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
-    log('[weight_rooms] booking ids: ', bookings)
-
-    today = datetime.today()
-    end_weed = today+timedelta(days=7)
-    # calculate total hours booked from user
-    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
-    total_week = cursor.scalar()
-    log(datetime.today().strftime('%Y-%m-%d'))
-
-    for slot in slots:
-
-        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
-
-        total_daily = cursor.scalar()
-
-        # add temporary calculated field for current user
-        slot.daily_reservations = total_daily
-
-    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()  ))
+    return loadSlots(start_date=start_date, end_date=end_date, delta=delta)
 
 @wr_bp.route('/select_slot', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
@@ -235,6 +162,33 @@ def unbook_slot():
         # end transaction
 
     return redirect(url_for('wr_bp.weight_rooms'))
+
+def loadSlots(start_date, end_date, delta):
+    days = []
+    slots = getAllSlots()
+    while start_date <= end_date:
+        days.append(Calendar(date=start_date, day=start_date.day, month=start_date.strftime("%B"), day_name=start_date.strftime('%A')))  
+        start_date += delta
+
+    # get all slot booked for current user
+    bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
+    log('[weight_rooms] booking ids: ', bookings)
+
+    today = datetime.today()
+    end_weed = today+timedelta(days=7) #calculate a week today + 7
+    # calculate total hours booked from user
+    cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
+    total_week = cursor.scalar()
+    log(datetime.today().strftime('%Y-%m-%d'))
+    log(total_week)
+
+    for slot in slots:
+        cursor = session.query(func.count(Booking.id)).filter(Booking.user == current_user.id, Slot.id == Booking.slot, Slot.date == slot.date)
+        total_daily = cursor.scalar()
+        # add temporary calculated field for current user
+        slot.daily_reservations = total_daily
+    
+    return make_response(render_template("weight_rooms.html", user=current_user, slots=slots,days=days, bookings=bookings, route=request.path, start_date=start_date, end_date=end_date, total_week=total_week, total_daily=total_daily, week_limit=get_week_limit(), daily_limit=get_daily_limit()))
 
 def get_week_limit():
     weight_room = session.query(WeightRoom).first()

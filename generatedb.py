@@ -230,7 +230,7 @@ admin2 = Owner(id=20, email='admin2@gmail.com', password='admin2', role='owner',
 db.session.add_all([admin2])
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
-room_1 = WeightRoom(id=1, name='Room 1', size=85, places=35, week_limit=None, daily_limit=None, gym=gold_gym.id)
+room_1 = WeightRoom(id=1, name='Room 1', size=85, places=1, week_limit=None, daily_limit=None, gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
 start_date = date.today()-timedelta(days=4)
@@ -258,9 +258,9 @@ zomba = Course(id=1, name='Zumba', places=10, gym=gold_gym.id, instructor=instru
 calisthenics = Course(id=2, name='Calisthenics', places=12, gym=gold_gym.id, instructor=instructor_2.id)
 yoga = Course(id=3, name='Yoga Relax', places=15, gym=gold_gym.id, instructor=instructor_3.id)
 
-l = CourseScheduling(day_of_week='Monday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
-m = CourseScheduling(day_of_week='Wednesday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
-v = CourseScheduling(day_of_week='Friday', start_hour='19:00', end_hour='20:30', places=50, course=zomba.id)
+l = CourseScheduling(day_of_week='Monday', start_hour='19:00', end_hour='20:30', places=zomba.places, course=zomba.id)
+m = CourseScheduling(day_of_week='Wednesday', start_hour='19:00', end_hour='20:30', places=zomba.places, course=zomba.id)
+v = CourseScheduling(day_of_week='Friday', start_hour='19:00', end_hour='20:30', places=zomba.places, course=zomba.id)
 
 
 l_c = CourseScheduling(day_of_week='Thursday', start_hour='20:00', end_hour='21:00', places=calisthenics.places, course=calisthenics.id)

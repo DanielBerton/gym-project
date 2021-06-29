@@ -151,7 +151,7 @@
                                     </div>
                                 <!-- {# END MODAL #} -->
     
-                                {% if slot.daily_reservations < daily_limit %}
+                                {% if slot.daily_reservations < daily_limit and slot.places > 0 %}
     
                                     <form>
                                         <button type="button" data-toggle="modal" data-target="#myModal"
@@ -162,7 +162,7 @@
                                             {% endif %}
                                         </button>
                                     </form>
-                                    {% else %}  
+                                {% else %}  
                                     <form>
                                         <button type="button" data-toggle="popover"
                                             class="btn-danger btn" onclick='myFunction({{slot.id}})'>
