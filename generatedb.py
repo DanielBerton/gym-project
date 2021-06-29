@@ -30,7 +30,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100))
     password = db.Column(db.String(50))
     role = db.Column(db.String(50), nullable=False)
-    #CHeck su role può essere solo owner, member eecc
     #__mapper_args__ = {'polymorphic_on': email }
 
     def __init__(self, id, email, password, role):
@@ -292,10 +291,8 @@ users = User.query.all ()
 owners = Owner.query.all ()
 instructors = Instructor.query.all ()
 
-# for o in owners:
-#     print (o)
 
-print (metadata.tables.keys())
+print(metadata.tables.keys())
 
 for u in owners:
     print (u)
