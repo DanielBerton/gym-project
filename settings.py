@@ -58,12 +58,13 @@ def setting():
 def update_weight_room():
     
     if request.method == 'POST':
-        # get params from form
+        # get params from form and escape string for security
         name = escape(request.form['name'])
         size = escape(request.form['size'])
         places = escape(request.form['places'])
         id = escape(request.form['id'])
 
+        # Start transaction
         with get_session() as session:
             wr = session.query(WeightRoom).filter_by(id=id).first()
             wr.places = places
@@ -81,11 +82,11 @@ def update_weight_room():
 def update_course():
     
     if request.method == 'POST':
-
+        # get params from form and escape string for security
         course_name = escape(request.form['course_name'])
         course_places = escape(request.form['course_places'])
         course_id = escape(request.form['id'])
-
+        # Start transaction
         with get_session() as session:
             wr = session.query(Course).filter_by(id=course_id).first()
             wr.places = course_places
@@ -103,6 +104,7 @@ def set_week_limit():
     week_limit = request.form['week_limit']
     log('set_week_limit', week_limit)
 
+    # Start transaction
     with get_session() as session:
         gym = session.query(Gym).filter_by(owner=current_user.id).first()
 
@@ -111,8 +113,6 @@ def set_week_limit():
         for weight_room in weight_rooms :
             print(weight_room)
             weight_room.week_limit = week_limit
-
-        #session.commit()
     
     return redirect(url_for('settings_bp.setting'))
 
@@ -130,10 +130,9 @@ def set_daily_limit():
         weight_rooms = session.query(WeightRoom).filter_by(gym=gym.id).all()
 
         for weight_room in weight_rooms :
-            print(weight_room)
+            log(weight_room)
             weight_room.daily_limit = daily_limit
 
-        #session.commit()
     return redirect(url_for('settings_bp.setting'))
 
 # retval return value like standard TRIGGER

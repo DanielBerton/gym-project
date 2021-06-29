@@ -1,34 +1,35 @@
 {% extends "base.html" %}
  {% block pagebody %}
-
- <div class="p-10">
-     <form action="{{ url_for('wr_bp.weight_rooms') }}">
-         
-         <button type="submit" class="btn btn-outline-primary btn-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
-              </svg>
-              Torna alla lista
-        </button>
-     </form>
- </div>
-<div class="container">
-    <div>
-        <h3>Lista utenti con prenotazione</h3>
-        {% if booking_list %}
-            <ul class="list-group">
-                    {% for book in booking_list %}
-                        <li class="list-group-item">
-                            <span class="text-primary">Utente: </span><b>{{book.email}} </b>
-                            <span class="text-primary">Giorno: </span><b>{{book.date}} </b>
-                            <span class="text-primary">Orario: </span><b>{{book.hour_from}} - {{book.hour_to}}</b></li>
-                    {% endfor %}  
-            </ul>
-        {% else %}
-            <p>Non ci sono prenotazioni per questo slot</p>
-        {% endif %}
+ <div class="container h-100">
+    <div class="p-10">
+        <form action="{{ url_for('wr_bp.weight_rooms') }}">
+            
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
+                </svg>
+                Torna alla lista
+            </button>
+        </form>
     </div>
+    <div class="container">
+        <div>
+            <h3>Lista utenti con prenotazione</h3>
+            {% if booking_list %}
+            {{booking_list}}
+                <ul class="list-group">
+                        {% for book in booking_list %}
+                            <li class="list-group-item">
+                                <span class="text-primary">Utente: </span><b>{{book.email}} </b>
+                                <span class="text-primary">Giorno: </span><b>{{book.date}} </b>
+                                <span class="text-primary">Orario: </span><b>{{book.hour_from}} - {{book.hour_to}}</b></li>
+                        {% endfor %}  
+                </ul>
+            {% else %}
+                <p>Non ci sono prenotazioni per questo slot</p>
+            {% endif %}
+        </div>
 
+    </div>
 </div>
-
 {% endblock %}

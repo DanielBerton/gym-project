@@ -66,15 +66,13 @@ def private ():
     if current_user.is_authenticated:
         log('is_authenticated')
         user = current_user
-    log('[private] executed')
-    users = User.query.all()
-    log('[private] users ', users)
+    log('[private] called')
 
     # check role, if owner go to admin_dashboard, else standard private page
     if (user.role == 'owner'):
-        resp = make_response(render_template("admin_dashboard.html", users=users, user=user, route=request.path))
+        resp = make_response(render_template("admin_dashboard.html", user=user, route=request.path))
     else:
-        resp = make_response(render_template("private.html", users=users, user=user, route=request.path))
+        resp = make_response(render_template("private.html", user=user, route=request.path))
 
     golden = session.query(Gym).join(WeightRoom).filter(Gym.id == WeightRoom.gym, Gym.id == 1).first()
 

@@ -45,7 +45,7 @@ db = SQLAlchemy(app, session_options={"autoflush": True})
 @wr_bp.route('/next', methods=['GET', 'POST'])
 @login_required # richiede autenticazione
 def next():
-    log('next')
+    log('[next] called')
     slots = getAllSlots()
     days = []
     input_date = strToDate(request.args.get("start_date"))
@@ -144,7 +144,6 @@ def weight_rooms():
     cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
     total_week = cursor.scalar()
     log(datetime.today().strftime('%Y-%m-%d'))
-    log(total_week)
 
     for slot in slots:
 
@@ -170,7 +169,7 @@ def select_slot():
     bookings = [r.slot for r in session.query(Booking.slot).filter_by(user=current_user.id)]
 
     is_booked = slot.id in bookings
-    log('isBooked: ', is_booked)
+    log('[select_slot] isBooked: ', is_booked)
 
     if (user.role == 'owner'):
         # prendiamo tutti gli gli utenti che hanno prenotato questo slot
@@ -209,8 +208,8 @@ def book_slot():
 @login_required # richiede autenticazione
 def booking_list():
 
-    booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date)
-    log(booking_list)
+    log('[booking_list] called')
+    booking_list = session.query(Booking, User.email, Slot.date, Slot.hour_from, Slot.hour_to, Slot.id).filter(Booking.user==User.id, Booking.slot==Slot.id).order_by(Slot.date).all()
 
     return make_response(render_template("total_booking_list.html", user=current_user, booking_list=booking_list))
 

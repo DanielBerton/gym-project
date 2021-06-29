@@ -2,7 +2,7 @@
 {% block pagebody %}
 
 
-<div class="container">
+<div class="container h-100">
     <div class="p-10">
         <form action="{{ url_for('wr_bp.weight_rooms') }}">
     
@@ -27,11 +27,11 @@
         </form>
         {% else %}
         <p><b>Prenota Slot</b></p>
-        <p>Giorno: {{ slot.day }} </p>
-        <p>ID: {{ slot.id }} </p>
-        <p>{{ slot.hour_from }} - {{ slot.hour_to }} </p>
-        Prenotazione per l'utente: {{ user.email }}
-        <p>Posti disponibili: {{ slot.places }}</p>
+        <p>Giorno: <b>{{ slot.day }}</b> </p>
+        <p>ID: <b>{{ slot.id }}</b> </p>
+        <p>Orario: <b>{{ slot.hour_from }} - {{ slot.hour_to }}</b> </p>
+        Prenotazione per l'utente: <b>{{ user.email }}</b>
+        <p>Posti disponibili: <b>{{ slot.places }}</b></p>
         <form action="/book_slot" method="GET">
             {% if slot.places < 1 %} <p>Limite posti superato, non è possibile prenotare questo slot</p>
                 <button type="submit" class="btn-success btn" name="slot_id" id="slot_id" value="{{slot.id}}" disabled>Conferma</button>
