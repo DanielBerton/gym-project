@@ -5,7 +5,7 @@ from flask import render_template
 from flask import request, redirect, url_for, make_response
 from flask_login import login_required, current_user, login_manager, LoginManager
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import query, sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join, update
 from flask_bootstrap import Bootstrap
@@ -19,13 +19,16 @@ from flask import url_for
 from flask import Blueprint 
 from models import *
 from utils.log import log
+from config import SECRET_KEY
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
-app.config['SECRET_KEY'] = 'ubersecret'
+# echo shows query and executions, set true just for development 
+
+app.config['SECRET_KEY'] = SECRET_KEY
 
 wr_bp = Blueprint('wr_bp', __name__)
 metadata = MetaData()
