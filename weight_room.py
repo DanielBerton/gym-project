@@ -176,7 +176,7 @@ def loadSlots(start_date, end_date, delta):
 
     today = datetime.today()
     end_weed = today+timedelta(days=7) #calculate a week today + 7
-    # calculate total hours booked from user
+    # calculate total hours booked from user for current week
     cursor = session.query(func.coalesce(func.sum(Slot.hour_to-Slot.hour_from), 0)).filter(Slot.id == Booking.slot, Booking.user == current_user.id, Slot.date > today.strftime('%Y-%m-%d'), Slot.date < end_weed.strftime('%Y-%m-%d'))
     total_week = cursor.scalar()
     log(datetime.today().strftime('%Y-%m-%d'))
