@@ -5,26 +5,27 @@ from flask import render_template
 from flask import request, redirect, url_for, make_response, escape
 from flask_login import login_required, current_user, login_manager, LoginManager
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import query, sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import join, update
 from flask_bootstrap import Bootstrap
 from utils import log
 from sqlalchemy import DDL, event, func
 from flask import Blueprint 
-
+from config import SECRET_KEY
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
+# echo shows query and executions, set true just for development 
 
 settings_bp = Blueprint('settings_bp', __name__)
 
 metadata = MetaData()
 bootstrap = Bootstrap(app)
 
-app.config['SECRET_KEY'] = 'ubersecret'
+app.config['SECRET_KEY'] = SECRET_KEY
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -135,6 +136,32 @@ def set_daily_limit():
         #session.commit()
     return redirect(url_for('settings_bp.setting'))
 
+# retval return value like standard TRIGGER
+@event.listens_for(Course.places, 'set', retval=True)
+def places_set(target, value, old_value, initiator):
+    log('[places_set] Course new value: ', value)
+    log('[places_set] Course old value: ', old_value)
+
+    # markupsafe.Markup type cast to int
+    if (int(value) > 20 or int(value) < 0):
+        return old_value
+    
+    return value
+
+# retval return value like standard TRIGGER
+@event.listens_for(WeightRoom.places, 'set', retval=True)
+def places_set(target, value, old_value, initiator):
+    log('[places_set] WeightRoom new value: ', value)
+    log('[places_set] WeightRoom old value: ', old_value)
+
+    wr = session.query(WeightRoom.size).filter(WeightRoom.id == target.id).first()
+
+    # markupsafe.Markup type cast to int
+    # set limit weight room size / 2 (1 person 2 mq)
+    if ((int(value) > wr.size/2) or int(value) < 0):
+        return old_value
+    
+    return value
 
 if __name__ == '__main__':
     app.run()

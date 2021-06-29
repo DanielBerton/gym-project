@@ -110,7 +110,6 @@ class WeightRoom(db.Model):
     __table_args__ = (
         db.UniqueConstraint('name', name='uniq_weight_room_name'),
         db.CheckConstraint('(size > 0)', name='weight_room_minimum_size'),
-        db.CheckConstraint('(places <= size/2)', name='weight_room__size_places_ratio'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     name = db.Column(db.String(100))
@@ -223,7 +222,6 @@ class BookingCourse(db.Model):
     
     def __repr__(self):
         return "<BookingCourse(id='%d', member='%s', course_scheduling='%s')>" % (self.id, self.member, self.course_scheduling)
-
 
 class Calendar:
     def __init__(self, date, day, month, day_name):

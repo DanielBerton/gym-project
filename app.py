@@ -14,23 +14,24 @@ from sqlalchemy import join, update
 from flask_bootstrap import Bootstrap
 from utils import log
 from sqlalchemy import DDL, event, func
-
+from config import SECRET_KEY
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
+engine = create_engine('sqlite:///database.db', echo=False, connect_args={'check_same_thread': False})
+# echo shows query and executions, set true just for development 
 
+# Register on blueprints
 app.register_blueprint(login_bp)
 app.register_blueprint(wr_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(courses_bp)
 
-
 metadata = MetaData()
 bootstrap = Bootstrap(app)
 
-app.config['SECRET_KEY'] = 'ubersecret'
+app.config['SECRET_KEY'] = SECRET_KEY
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -93,9 +94,7 @@ def admin_dashboard():
     return make_response(render_template("admin_dashboard.html", user=current_user, route=request.path))
 
 
-
 if __name__ == '__main__':
     app.run()
 
-    from views import *
     

@@ -24,7 +24,7 @@
                                 <div class="form-group">
                                     <label>Posti sala</label>
                                     <input type="number" class="form-control" name="places" placeholder="Posti" value="{{ weight_room.places }}">
-                                    <small class="form-text text-muted">Si intendono i posti per ogni singolo slot. (Il limite è di 1 posto ogni 2mq)</small>
+                                    <small class="form-text text-muted">Si intendono i posti per ogni singolo slot. Il limite è di 1 posto ogni 2mq (eventuali modifiche eccedenti saranno ignorate)</small>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Modifica impostazioni sala</button>
                             </form>
@@ -50,7 +50,7 @@
                                 <div class="form-group">
                                     <label for="coursePlaces">Posti corso</label>
                                     <input type="number" class="form-control" name="course_places" placeholder="Posti" value="{{ course.places }}">
-                                    <small  class="form-text text-muted">Si intendono i posti per ogni singola sessione del corso.</small>
+                                    <small  class="form-text text-muted">Il limite per legge è di 20 persone per corso. Numeri superiori non saranno presi in considerazione.</small>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Modifica impostazioni corso</button>
                             </form>

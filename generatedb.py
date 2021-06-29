@@ -112,7 +112,6 @@ class WeightRoom(db.Model):
     __table_args__ = (
         db.UniqueConstraint('name', name='uniq_weight_room_name'),
         db.CheckConstraint('(size > 0)', name='weight_room_minimum_size'),
-        db.CheckConstraint('(places <= size/2)', name='weight_room__size_places_ratio'),
     )
     id = db.Column('id', db.Integer, primary_key = True)
     name = db.Column(db.String(100))
