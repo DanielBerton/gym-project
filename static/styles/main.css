@@ -137,3 +137,23 @@ html {
     height: 20px;
     border-radius: 50%;
   }
+
+.footer {
+    color: white;
+  }
+
+.footer p {
+    padding-left: 10px;
+}
+
+.footer {
+    /* position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%; */
+    color: white;
+  }
+
+.card-body {
+    padding: 1.25rem !important;
+}

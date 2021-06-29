@@ -14,8 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 metadata = MetaData()
 
-app.config['SECRET_KEY'] = 'ubersecret'
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 

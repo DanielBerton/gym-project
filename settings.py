@@ -2,7 +2,7 @@ from utils.util import get_session
 from models import *
 from flask import Flask
 from flask import render_template
-from flask import request, redirect, url_for, make_response
+from flask import request, redirect, url_for, make_response, escape
 from flask_login import login_required, current_user, login_manager, LoginManager
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
@@ -58,10 +58,10 @@ def update_weight_room():
     
     if request.method == 'POST':
         # get params from form
-        name = request.form['name']
-        size = request.form['size']
-        places = request.form['places']
-        id = request.form['id']
+        name = escape(request.form['name'])
+        size = escape(request.form['size'])
+        places = escape(request.form['places'])
+        id = escape(request.form['id'])
 
         with get_session() as session:
             wr = session.query(WeightRoom).filter_by(id=id).first()
@@ -81,9 +81,9 @@ def update_course():
     
     if request.method == 'POST':
 
-        course_name = request.form['course_name']
-        course_places = request.form['course_places']
-        course_id = request.form['id']
+        course_name = escape(request.form['course_name'])
+        course_places = escape(request.form['course_places'])
+        course_id = escape(request.form['id'])
 
         with get_session() as session:
             wr = session.query(Course).filter_by(id=course_id).first()

@@ -13,12 +13,10 @@ from datetime import date, timedelta
 from utils import log
 from datetime import datetime
 from sqlalchemy import DDL, event, func
-
 from flask import request
 from flask import redirect
 from flask import url_for
 from flask import Blueprint 
-from flask_login import login_user
 from models import *
 from utils.log import log
 
@@ -27,11 +25,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 engine = create_engine('sqlite:///database.db', echo=True, connect_args={'check_same_thread': False})
 
+app.config['SECRET_KEY'] = 'ubersecret'
+
 wr_bp = Blueprint('wr_bp', __name__)
 metadata = MetaData()
 bootstrap = Bootstrap(app)
-
-app.config['SECRET_KEY'] = 'ubersecret'
 
 login_manager = LoginManager()
 login_manager.init_app(app)

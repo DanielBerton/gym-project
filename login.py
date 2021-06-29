@@ -1,8 +1,9 @@
 from flask import request
 from flask import redirect
-from flask import url_for
+from flask import url_for, escape
 from flask import Blueprint 
 from flask_login import login_user
+from werkzeug.utils import escape
 from models import *
 from utils.log import log
 
@@ -20,15 +21,14 @@ def login ():
     log('[login] executed')
     if request.method == 'POST':
 
-        email = request.form['user']
-
+        email = escape(request.form['user'])
         user = User.query.filter_by(email=email).first()
-
+        password = escape(request.form['password'])
         log('[login] user: ',  user)
         if (user and user.password is not None):
-            log('[login]', 'OK ' + request.form['password']+ '  ' +user.password)
-            if request.form['password'] == user.password:
-                users = get_user_by_email(request.form['user'])
+            log('[login]', 'OK ' + password+ '  ' +user.password)
+            if password == user.password:
+                users = get_user_by_email(email)
                 login_user(users)
                 return redirect(url_for('private'))
         else:
