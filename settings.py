@@ -74,7 +74,6 @@ def update_weight_room():
             slots = session.query(Slot).filter_by(weight_room=id).all()
             for slot in slots:
                 slot.places = places
-            session.commit()
     
     return redirect(url_for('settings_bp.setting'))
 
@@ -96,7 +95,6 @@ def update_course():
             course_schedulings = session.query(CourseScheduling).filter_by(course=course_id).all()
             for course_scheduling in course_schedulings:
                 course_scheduling.places = course_places
-            session.commit()
 
     return redirect(url_for('settings_bp.setting'))
 
@@ -115,7 +113,7 @@ def set_week_limit():
         for weight_room in weight_rooms :
             log(weight_room)
             weight_room.week_limit = week_limit
-        session.commit()
+            
     return redirect(url_for('settings_bp.setting'))
 
 @settings_bp.route('/set_daily_limit', methods=['GET', 'POST'])
@@ -134,7 +132,7 @@ def set_daily_limit():
         for weight_room in weight_rooms :
             log(weight_room)
             weight_room.daily_limit = daily_limit
-        session.commit()
+
     return redirect(url_for('settings_bp.setting'))
 
 # retval return value like standard TRIGGER

@@ -62,17 +62,17 @@
         <h2>Configurazione <span class="badge badge-secondary">Extra</span></h2>
             <form action="/set_week_limit" method="POST">
                 <div class="form-group">
-                    <label >Limite accessi settimanale</label>
+                    <label >Limite orario settimanale</label>
                     <input type="number" required class="form-control" name="week_limit" placeholder="4 ..." value="{{week_limit}}" max="168">
-                    <small  class="form-text text-muted">Imposta limite di accessi alla sala pesi settimanali per utente (espresso in in ore per tutte le sale)</small>
+                    <small  class="form-text text-muted">Imposta un limite di ore settimanali alla sala pesi per utente (limite orario)</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Imposta limite</button>
             </form>
             <form action="/set_daily_limit" method="POST">
                 <div class="form-group">
-                    <label >Limite orario</label>
+                    <label >Limite ingressi giornaliero</label>
                     <input type="number" required class="form-control" name="daily_limit" placeholder="3 ..." value="{{daily_limit}}" max="24">
-                    <small class="form-text text-muted">Imposta limite di ore giornaliere alla sala pesi per utente</small>
+                    <small class="form-text text-muted">Imposta un limite di ingressi giornaliere alla sala pesi per utente</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Imposta limite</button>
             </form>

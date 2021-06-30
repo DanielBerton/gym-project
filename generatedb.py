@@ -229,11 +229,12 @@ admin2 = Owner(id=20, email='admin2@gmail.com', password='admin2', role='owner',
 db.session.add_all([admin2])
 gold_gym = Gym(id=1, name='Golden Gym', address='360 Hampton Dr', city='Venice', zipCode='90291', country='United States', owner=admin.id)
 
-room_1 = WeightRoom(id=1, name='Room 1', size=85, places=1, week_limit=None, daily_limit=None, gym=gold_gym.id)
+room_1 = WeightRoom(id=1, name='Room 1', size=85, places=20, week_limit=None, daily_limit=None, gym=gold_gym.id)
 
 datetime_object = datetime.datetime.now()
-start_date = date.today()-timedelta(days=4)
-end_date = date(2021, 7, 31)
+start_date = date.today()-timedelta(days=2)
+# from today to next month
+end_date = date.today()+timedelta(days=30)
 delta = timedelta(days=1)
 while start_date <= end_date:
     db.session.add_all([
